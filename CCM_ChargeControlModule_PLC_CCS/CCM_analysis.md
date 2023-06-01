@@ -1,10 +1,15 @@
 
 # Pictures
 
-![image](CCM_ChargeControlModule_PLC_CCS/CCM_frontside.jpg)
-![image](CCM_ChargeControlModule_PLC_CCS/CCM_Backside.jpg)
-![image](CCM_ChargeControlModule_PLC_CCS/CCM_U5_QCA7005-AL33.jpg)
-![image](CCM_ChargeControlModule_PLC_CCS/CCM_U4_FlashMemory.jpg)
+![image](CCM_frontside.jpg)
+![image](CCM_Backside.jpg)
+![image](CCM_U5_QCA7005-AL33.jpg)
+![image](CCM_U4_FlashMemory.jpg)
+![image](CCM_connector_car_side.jpg)
+![image](CCM_development_connector_and_version.jpg)
+![image](CCM_housing.jpg)
+![image](CCM_main_controller.jpg)
+
 
 # General
 
