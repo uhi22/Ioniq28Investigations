@@ -33,17 +33,7 @@ Found the CCM in this place in my 2018 Ioniq car: ![image](CCM_ChargeControlModu
 
 ### Inside the CCM
 
-![image](CCM_ChargeControlModule_PLC_CCS/CCM_frontside.jpg)
-![image](CCM_ChargeControlModule_PLC_CCS/CCM_Backside.jpg)
-![image](CCM_ChargeControlModule_PLC_CCS/CCM_U5_QCA7005-AL33.jpg)
-![image](CCM_ChargeControlModule_PLC_CCS/CCM_U4_FlashMemory.jpg)
-
-Besides the main controller, a Freescale MPC5605B 32-bit-controller including CAN
-(see https://www.nxp.com/products/processors-and-microcontrollers/power-architecture/mpc5xxx-microcontrollers/ultra-reliable-mpc56xx-mcus/ultra-reliable-mpc56xb-mcu-for-automotive-and-industrial-general-purpose:MPC560xB),
-the interesting part is the QCA7005 PLC modem and the connected SPI flash memory. The connections between the SPI flash and the QCA are plausible matching to the schematic here: https://github.com/Millisman/QCA7000
-It seems that the SPI flash exposes all necessary pins to well-labeled test points, so this is a good basis to read out the content of the SPI flash.
-
-The PCB is "sealed" with a kind of protection seal. But, fortunately, the can be easily removed with alcohol.
+see [CCM_analysis.md](CCM_analysis.md)
 
 ### Cross reference to the Kona (similar but not the same)
 
