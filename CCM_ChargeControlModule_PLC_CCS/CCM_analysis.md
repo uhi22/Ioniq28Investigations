@@ -5,7 +5,6 @@
 ![image](CCM_Backside.jpg)
 ![image](CCM_U5_QCA7005-AL33.jpg)
 ![image](CCM_U4_FlashMemory.jpg)
-![image](CCM_connector_car_side.jpg)
 ![image](CCM_development_connector_and_version.jpg)
 ![image](CCM_housing.jpg)
 ![image](CCM_main_controller.jpg)
@@ -22,6 +21,9 @@ The PCB is "sealed" with a kind of protection seal. But, fortunately, the can be
 
 
 # Vehicle side connector
+
+![image](CCM_connector_car_side.jpg)
+
 - 1 PCANH (orange)
 - 2 PCANL (green)
 - 3 Control Pilot CP (green)
@@ -29,7 +31,7 @@ The PCB is "sealed" with a kind of protection seal. But, fortunately, the can be
 - 5 Shield (GND)
 - 6 Power (red)
 - 7 not used, GND
-- 8 Ignition input from F21
+- 8 Ignition input from F21 (pink)
 
 Current consumption (when Power and Ignition are bridged): 9V/160mA or 13V/120mA
 
