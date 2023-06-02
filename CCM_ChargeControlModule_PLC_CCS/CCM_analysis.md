@@ -118,5 +118,25 @@ e.g. https://www.tme.eu/Document/90cf95a7114025302d33a68125e207ab/MX25L1606E.pdf
 ## Does the Ioniq complain if the CCM is not installed?
 No. AC charging still works. No error message in the dashboard.
 
+# CAN Communication
+
+## Which messages does the CCM transmit?
+
+When no other control units are present on the CAN, the CCM is transmitting the following messages:
+0x5E5 (100ms cycle)
+0x5E6 (100ms cycle)
+0x5E8 (100ms cycle)
+0x5E9 (100ms cycle)
+
+## Which CAN messages are necessary that the CCM sends a SlacParamReq?
+
+By replaying an trace from vehicle, and filtering-out most of the messages, found out that are only three messages required by the CCM to
+initiate a PLC communication:
+- 0x57F unclear what this contains
+- 0x597 contains a toggle bit and some other information
+- 0x599 contains the "CCS trigger bit" (byte7, bit 0), which initiates the SLAC. Also the SOC in byte 2.
+
+Using these three messages from the trace ioniq2018_motorCAN_500k_HPC.asc (from github.com/uhi22/IoniqMotorCAN/Traces), and replaying them against
+a physical CCM unit, the CCM makes the SLAC, SDP and comes until PowerDeliveryReq, with 34% SOC. Afterwards it sends a SessionStopRequest.
 
 
