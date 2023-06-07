@@ -66,6 +66,9 @@ From connector CON3 point of view:
 - CON3.13 = ?
 - CON3.14 = ?
 
+This is the same connector layout as described in https://www.isystem.com/files/content/downloads/documents/hardware-reference-manuals/Debug-Adapters-UM.pdf
+for the 14-pin 2.54mm MPC5xxx Debug Adapter.
+
 ## Power Supply
 
 U17, L11: Down-Converter from 12V to 5V.
