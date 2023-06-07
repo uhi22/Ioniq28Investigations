@@ -55,7 +55,7 @@ MPC5605BMLQ, 144pin
 
 - 64k according to data sheet.
 - 0x80'0000 to 0x80'FFFF
-- Dump: readout_dataflash_CCM_ioniq_00_33_79.s19
+- Dump: [readout_dataflash_CCM_ioniq_00_33_79.s19](readout_dataflash_CCM_ioniq_00_33_79.s19)
 - The MAC address (which is used on SPI and PLC) is contained four times in the data flash, e.g. around 0x803E7E, after a kind of serial number.
 
 ## Where is pin 1?
