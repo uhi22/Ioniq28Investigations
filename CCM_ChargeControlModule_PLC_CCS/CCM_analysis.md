@@ -82,11 +82,13 @@ From connector CON3 point of view:
 - CON3.10 = TMS (Debug interface)
 - CON3.11 = VDD_HV, 3.3V, C95, C30, C37 to ground.
 - CON3.12 = GND
-- CON3.13 = ?
-- CON3.14 = ?
+- CON3.13 = (not used)
+- CON3.14 = (not used)
 
 This is the same connector layout as described in https://www.isystem.com/files/content/downloads/documents/hardware-reference-manuals/Debug-Adapters-UM.pdf
 for the 14-pin 2.54mm MPC5xxx Debug Adapter.
+
+The debug interface is not protected. Reading out the memory works fine using a debugger. The only precondition is to add a bridge to CON12, to disable the watchdog.
 
 ## Power Supply
 
@@ -125,7 +127,7 @@ SPI configuration: sampling on rising edge, shifting on falling edge (CPHA=1). C
 
 Using the saleae logic analyzer, recorded a trace of the SPI communication after power on of the CCM, and then replaying a CAN trace from car,
 while on the CP line there was the pyPLC (on Raspberry) connected as EVSE. The charging session runs until ContractAuthentication.
-Result here: CCM_SPI_powerOn_and_SLAC_until_contractAuth.txt
+Result here: [CCM_SPI_powerOn_and_SLAC_until_contractAuth.txt]
 
 The protocol is explained in the AN4 application note from InTech / I2SE, see an4_rev5_QCA7000_application_note_with_protocol.pdf.
 The ethernet frames are visible in the above SPI trace after the 0xAAAAAAAA start-of-frame-markers, 2 bytes length information, 2 fill bytes.
@@ -134,6 +136,7 @@ Surprising fact is, that the MAC which is printed on the housing of the CCM is t
 On the other hand, the MAC of the Raspberry EVSE is correctly visible on SPI, and also the CCM reports a
 consistent MAC on SPI and on PLC, only the paper label on the housing differs.
 
+![image](CCM_on_bench_logic_analyzer_and_CAN_connected.jpg)
 
 ## Which are the other SPI signals, between the QCA and the Flash?
 QCA.3 = data_in = TP16 = flash.2 = SO
