@@ -36,8 +36,27 @@ The PCB is "sealed" with a kind of protection seal. But, fortunately, the can be
 Current consumption (when Power and Ignition are bridged): 9V/160mA or 13V/120mA
 
 # Main controller
+
 ## Which controller type is used?
+
 MPC5605BMLQ, 144pin
+
+## Memory
+
+### CodeFlash
+
+- 768k according to data sheet. This is 0x00 to 0xB'FFFF.
+- Shadow flash 0x20'0000 to 0x20'3FFF (according to https://www.nxp.com/files-static/32bit/doc/ref_manual/MPC5606BRM.pdf)
+- 0x20'3dd8: FEED FACE CAFE BEEF
+- 0x20'3FFF: last readable address
+- Dumps: readout_codeflash_CCM_ioniq_00_33_79.s19 and readout_shadowflash_CCM_ioniq_00_33_79.s19
+
+### DataFlash
+
+- 64k according to data sheet.
+- 0x80'0000 to 0x80'FFFF
+- Dump: readout_dataflash_CCM_ioniq_00_33_79.s19
+- The MAC address (which is used on SPI and PLC) is contained four times in the data flash, e.g. around 0x803E7E, after a kind of serial number.
 
 ## Where is pin 1?
 Right to the 45° corner. It is marked with a triangle on the PCB. Near to the 6-pin-connector CON13.
@@ -71,13 +90,13 @@ for the 14-pin 2.54mm MPC5xxx Debug Adapter.
 
 ## Power Supply
 
-U17, L11: Down-Converter from 12V to 5V.
-U2: 5V in, 3.3V out (Linear regulator)
+- U17, L11: Down-Converter from 12V to 5V.
+- U2: 5V in, 3.3V out (Linear regulator)
 
 ## Reset circuit
 
 - U16.1 via R117 to U16.8
-- U16.2 is CON12.1, may be a jumper to disable the watchdog?
+- U16.2 is CON12.1; The CON12 needs to be shortened to disable the watchdog trigger for use with a debugger.
 - U16.3 via C28 to GND
 - U16.4 = GND
 
@@ -89,16 +108,32 @@ U2: 5V in, 3.3V out (Linear regulator)
 
 ## Which SPI pins are used to drive the QCA from the microcontroller?
 
-QCA.14 = SPI_slave_MOSI  =      µC.44 (with via) = PA13 = SOUT_0
-QCA.15 = SPI_slave_MISO  =      µC.45 (with via) = PA12 = SIN_0
-QCA.16 = SPI_slave_chipselect = µC.42 (with via) = PA14 = CS0_0
-QCA.19 = SPI_slave_clock =      µC.40 (with via) = PA15 = SCK_0
+- QCA.14 = SPI_slave_MOSI  =      µC.44 (with via) = PA13 = SOUT_0
+- QCA.15 = SPI_slave_MISO  =      µC.45 (with via) = PA12 = SIN_0
+- QCA.16 = SPI_slave_chipselect = µC.42 (with via) = PA14 = CS0_0
+- QCA.19 = SPI_slave_clock =      µC.40 (with via) = PA15 = SCK_0
 
 ![image](CCM_host_SPI_testpoints_on_controller.jpg)
+
+## Deeper SPI analysis
 
 After power-on of the CCM, the clock has packages of 16 cycles in 1.2µs, means 75ns per cycle, means 13MHz SPI clock.
 Multiple of these 16-bit-packages are contained in one chip-select-low-phase. The length of the transmission is different,
 up to 90µs.
+
+SPI configuration: sampling on rising edge, shifting on falling edge (CPHA=1). Clock is high when inactive (CPOL=1). MSB first.
+
+Using the saleae logic analyzer, recorded a trace of the SPI communication after power on of the CCM, and then replaying a CAN trace from car,
+while on the CP line there was the pyPLC (on Raspberry) connected as EVSE. The charging session runs until ContractAuthentication.
+Result here: CCM_SPI_powerOn_and_SLAC_until_contractAuth.txt
+
+The protocol is explained in the AN4 application note from InTech / I2SE, see an4_rev5_QCA7000_application_note_with_protocol.pdf.
+The ethernet frames are visible in the above SPI trace after the 0xAAAAAAAA start-of-frame-markers, 2 bytes length information, 2 fill bytes.
+
+Surprising fact is, that the MAC which is printed on the housing of the CCM is totally different to the MAC used in the PLC communication.
+On the other hand, the MAC of the Raspberry EVSE is correctly visible on SPI, and also the CCM reports a
+consistent MAC on SPI and on PLC, only the paper label on the housing differs.
+
 
 ## Which are the other SPI signals, between the QCA and the Flash?
 QCA.3 = data_in = TP16 = flash.2 = SO
