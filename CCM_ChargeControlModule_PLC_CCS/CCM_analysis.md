@@ -49,7 +49,7 @@ MPC5605BMLQ, 144pin
 - Shadow flash 0x20'0000 to 0x20'3FFF (according to https://www.nxp.com/files-static/32bit/doc/ref_manual/MPC5606BRM.pdf)
 - 0x20'3dd8: FEED FACE CAFE BEEF
 - 0x20'3FFF: last readable address
-- Dumps: readout_codeflash_CCM_ioniq_00_33_79.s19 and readout_shadowflash_CCM_ioniq_00_33_79.s19
+- Dumps: [readout_codeflash_CCM_ioniq_00_33_79.s19](readout_codeflash_CCM_ioniq_00_33_79.s19) and [readout_shadowflash_CCM_ioniq_00_33_79.s19](readout_shadowflash_CCM_ioniq_00_33_79.s19)
 
 ### DataFlash
 
@@ -101,7 +101,6 @@ The debug interface is not protected. Reading out the memory works fine using a 
 - U16.2 is CON12.1; The CON12 needs to be shortened to disable the watchdog trigger for use with a debugger.
 - U16.3 via C28 to GND
 - U16.4 = GND
-
 - U16.5 = GND
 - U16.6 = TP near R55, µC.17 PE11. Square wave, 20ms off, 20ms on. 3.3V/0V. Looks like watchdog trigger.
 - U16.7 provides the NRESET to the controller
@@ -139,10 +138,10 @@ consistent MAC on SPI and on PLC, only the paper label on the housing differs.
 ![image](CCM_on_bench_logic_analyzer_and_CAN_connected.jpg)
 
 ## Which are the other SPI signals, between the QCA and the Flash?
-QCA.3 = data_in = TP16 = flash.2 = SO
-QCA.65 = chipselect = TP12 = flash.1 = chipselect
-QCA.66 = data_out = TP11 = flash.5 = SI
-QCA.67 = clock = TP10 = flash.6 = SCLK
+- QCA.3 = data_in = TP16 = flash.2 = SO
+- QCA.65 = chipselect = TP12 = flash.1 = chipselect
+- QCA.66 = data_out = TP11 = flash.5 = SI
+- QCA.67 = clock = TP10 = flash.6 = SCLK
 
 ## Flash memory U4
 e.g. https://www.tme.eu/Document/90cf95a7114025302d33a68125e207ab/MX25L1606E.pdf
