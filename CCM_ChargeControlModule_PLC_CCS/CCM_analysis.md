@@ -180,4 +180,31 @@ initiate a PLC communication:
 Using these three messages from the trace ioniq2018_motorCAN_500k_HPC.asc (from github.com/uhi22/IoniqMotorCAN/Traces), and replaying them against
 a physical CCM unit, the CCM makes the SLAC, SDP and comes until PowerDeliveryReq, with 34% SOC. Afterwards it sends a SessionStopRequest.
 
+### Reconstruction of the start of a CCS charging session
+
+(Timing from the CAN trace with alpitronics charger)
+1. t=0: After plugging in and applying the 5% PWM, this first activity on CAN is 5D7_1_CCS_firstTrigger=1
+2. t=596ms: CCS_COMMS_TRIGGER = 1
+3. t=600ms: 5D7_1_CcsStart = 1.
+4. t=6.9s: CCM_CCS_TCP_connected = 1
+5. t=8.5s: CCM_ChargeProgress=1 (ConnectorLocking request?)
+6. 5D7_4_remainingTimeBulk indicates the time until bulk charge complete
+7. 5D7_0_ConnectorLockConfirm=1 Confirms the connector lock (?)
+8. CCM_ChargeProgress changes to CableCheck (3)
+9. 542_78_UCCS ramps up to 500V.
+10. After 9.5s cable check, the voltage ramps down.
+11. When the voltage is below 6V, the CCM_ChargeProgress changes to PreCharge.
+12. After 0.9s, this is confirmed by the 5D7_1.1 PreChCnf
+13. CCM_ChargeProgress changes to PowerDeliveryStart
+14. 5D7_1.4_ContactorsClosed confirmes the closed contactors
+15. CCM_ChargeProgress changes to CurrentDemand
+16. Current is ramping up. Charging.
+17. 5D7_4_remainingTimeBulk is decreasing each minute by 60s.
+18. When charging ends, the CCM_ChargeProgress changes to 63 (PowerDeliveryStop).
+19. 5D7_0_ConnectorLockConfirm changes to 0. (This is too early for a connector unlocking. Maybe its an other signal.)
+20. The inlet voltage (542_78_UCCS) is ramping down.
+21. CCM_ChargeProgress 127 (WeldingDetection).
+
+
+
 
