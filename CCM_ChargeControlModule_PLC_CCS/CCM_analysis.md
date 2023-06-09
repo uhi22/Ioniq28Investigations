@@ -131,6 +131,9 @@ Result here: [CCM_SPI_powerOn_and_SLAC_until_contractAuth.txt](CCM_SPI_powerOn_a
 The protocol is explained in the AN4 application note from InTech / I2SE, see an4_rev5_QCA7000_application_note_with_protocol.pdf.
 The ethernet frames are visible in the above SPI trace after the 0xAAAAAAAA start-of-frame-markers, 2 bytes length information, 2 fill bytes.
 
+Using a python script [spiInterpreter.py](spiInterpreter.py) the SPI trace can be converted into a pcap file (example [CCM_SPI_powerOn_and_SLAC_until_contractAuth.txt.pcap](CCM_SPI_powerOn_and_SLAC_until_contractAuth.txt.pcap), which can be inspected using
+wireshark and further processed to make the V2G/EXI content visible (e.g. with https://github.com/uhi22/pyPLC/blob/master/pcapConverter.py and https://github.com/uhi22/pyPLC/blob/master/scope.py).
+
 Surprising fact is, that the MAC which is printed on the housing of the CCM is totally different to the MAC used in the PLC communication.
 On the other hand, the MAC of the Raspberry EVSE is correctly visible on SPI, and also the CCM reports a
 consistent MAC on SPI and on PLC, only the paper label on the housing differs.
