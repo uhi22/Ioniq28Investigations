@@ -15,6 +15,14 @@
 # 4.742271160000000,0,0x00,0x00
 # 4.742272288000000,0,0x00,0x00
 
+# Format2:
+#name,type,start_time,"mosi","miso"
+#"SPI","enable",35.620134,,
+#"SPI","result",35.6201342,0xC2,0x00
+#"SPI","result",35.6201348,0x00,0x00
+#"SPI","result",35.620136,0x00,0x00
+
+
 
 # Precondition: Scapy is installed
 # pip install scapy
@@ -151,9 +159,33 @@ def readSpiTrace(inputFileName):
                     # ignore invalid values
                     pass
                 misoDecoder.byteSeen(miso, t)
+            if (len(elementList)==5):
+                strTime = elementList[2]
+                try:
+                    t = float(strTime)
+                except:
+                    t = 0.0
+                strMosiData = elementList[3]
+                mosi = 0
+                try:
+                    mosi = int(strMosiData, 0) # convert string like "0xAA" into number
+                    #print("ok" + hex(x))
+                except:
+                    # ignore invalid values
+                    pass
+                mosiDecoder.byteSeen(mosi, t)
+                strMisoData = elementList[4]
+                miso = 0
+                try:
+                    miso = int(strMisoData, 0) # convert string like "0xAA" into number
+                    #print("ok" + hex(x))
+                except:
+                    # ignore invalid values
+                    pass
+                misoDecoder.byteSeen(miso, t)
                         
 
-strSpiTraceFileName = "CCM_SPI_powerOn_and_SLAC_until_contractAuth.txt"
+strSpiTraceFileName = "ccm_spi_ioniq_compleo_full_charge_sequence_ended_on_charger.txt"
 # parse the SPI trace and collect the network packets
 readSpiTrace(strSpiTraceFileName)
 # write the collected packets into pcap file
