@@ -154,6 +154,12 @@ consistent MAC on SPI and on PLC, only the paper label on the housing differs.
 - QCA.66 = data_out = TP11 = flash.5 = SI
 - QCA.67 = clock = TP10 = flash.6 = SCLK
 
+## Where is the reset pin of the QCA?
+
+QCA.5 is the reset input. External pull-up R107 to VCC (C59, C50, U2). TP13 on the bottom side.
+
+
+
 ## Flash memory U4
 e.g. https://www.tme.eu/Document/90cf95a7114025302d33a68125e207ab/MX25L1606E.pdf
 - pin 1: CS
