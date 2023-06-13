@@ -159,7 +159,6 @@ consistent MAC on SPI and on PLC, only the paper label on the housing differs.
 QCA.5 is the reset input. External pull-up R107 to VCC (C59, C50, U2). TP13 on the bottom side.
 
 
-
 ## Flash memory U4
 e.g. https://www.tme.eu/Document/90cf95a7114025302d33a68125e207ab/MX25L1606E.pdf
 - pin 1: CS
@@ -170,6 +169,12 @@ e.g. https://www.tme.eu/Document/90cf95a7114025302d33a68125e207ab/MX25L1606E.pdf
 - pin 6: SCLK
 - pin 7: hold (connected to VCC)
 - pin 8: VCC, TP9
+
+## How to read out the SPI flash memory U4?
+
+Hold the QCA in reset, by connecting TP13 to ground.
+Connect an Arduino to the four SPI lines of the U4. Use the Arduino sketch Arduino_SpiFlash. (Adjust the memory size to read out and maybe the format as wanted.)
+Connect the power of the Arduino to the 3,3V (TP9). Do not power the Arduino externally. Store the output of the Arduinos serial to a file (e.g. using Putty on the COM port).
 
 # Car Integration
 ## Does the Ioniq complain if the CCM is not installed?
