@@ -11,7 +11,7 @@
 uint8_t readbuffer[READ_BUFFER_LEN];
 uint32_t address;
 
-
+#define USE_OUTPUTFORMAT_S19
 
 uint8_t softspi_talk8bit(uint8_t b) {
   int i;
@@ -84,8 +84,11 @@ void readAll(void) {
   String sAddr;
   String sData;
   String sAscii;
+  String sChecksum;
   uint8_t b, i;
-  uint32_t maxAddress = 0x10000;
+  uint8_t sum;
+  //uint32_t maxAddress = 0x10000; /* 64kByte for test */
+  uint32_t maxAddress = 2*1024uL*1024uL; /* 2MB full memory size */
   
   while (address<maxAddress) {
     sAddr =  twoByteHex(address>>16)  +   twoByteHex(address>>8) + twoByteHex(address) ;
@@ -94,11 +97,32 @@ void readAll(void) {
     sAscii = "";
     for (i=0; i<READ_BUFFER_LEN; i++) {
       b=readbuffer[i];
-      sData = sData + twoByteHex(b) + " ";
+      sData = sData + twoByteHex(b);
+      #ifndef USE_OUTPUTFORMAT_S19
+        sData = sData + " "; /* spaces between the data for better readability */
+      #endif      
       if (b<0x20) b=0x21;
       sAscii = sAscii + (char)b;
     }
-    Serial.println(sAddr + ":" + sData + "  " + sAscii);
+    #ifdef USE_OUTPUTFORMAT_S19
+      /* print an S19 line to console. This can be recorded e.g. with Putty to a file, to have an S19 file in the end. */
+      sum = 0;
+      sum+=0x25;
+      sum+=address>>16;
+      sum+=address>>8;
+      sum+=address;
+      for (i=0; i<READ_BUFFER_LEN; i++) {
+        sum+=readbuffer[i];
+      }
+      sum ^= 0xFF; /* we need the ones-complement of the sum */
+      sChecksum =twoByteHex(sum);
+      sAddr = "00" + sAddr; /* extend the 3 byte address to 4 byte address. */
+      /* S3 means: 4-byte address. 25 is the number of bytes incl address and checksum */
+      Serial.println("S325" + sAddr + sData + sChecksum);      
+    #else
+      /* print a readable string to the console, consisting of address, data as hex and data as ASCII */
+      Serial.println(sAddr + ":" + sData + "  " + sAscii);
+    #endif
     address+=READ_BUFFER_LEN;
   }    
 
@@ -116,7 +140,7 @@ void setup()
   digitalWrite(SOFTSPI_CS, HIGH);
   digitalWrite(SOFTSPI_CLK, HIGH);
   digitalWrite(SOFTSPI_MOSI, HIGH);
-  Serial.begin(115200);
+  Serial.begin(230400);
   Serial.println("Started");
   Serial.print("Identification:");
   Serial.println(ReadIdentification(), HEX);

@@ -172,6 +172,8 @@ e.g. https://www.tme.eu/Document/90cf95a7114025302d33a68125e207ab/MX25L1606E.pdf
 
 ## How to read out the SPI flash memory U4?
 
+[CCM_SPIFLASH_readout_with_arduino.jpg](CCM_SPIFLASH_readout_with_arduino.jpg)
+
 Hold the QCA in reset, by connecting TP13 to ground.
 Connect an Arduino to the four SPI lines of the U4. Use the Arduino sketch Arduino_SpiFlash. (Adjust the memory size to read out and maybe the format as wanted.)
 Connect the power of the Arduino to the 3,3V (TP9). Do not power the Arduino externally. Store the output of the Arduinos serial to a file (e.g. using Putty on the COM port).
