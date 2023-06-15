@@ -128,6 +128,9 @@ Using the saleae logic analyzer, recorded a trace of the SPI communication after
 while on the CP line there was the pyPLC (on Raspberry) connected as EVSE. The charging session runs until ContractAuthentication.
 Result here: [CCM_SPI_powerOn_and_SLAC_until_contractAuth.txt](CCM_SPI_powerOn_and_SLAC_until_contractAuth.txt)
 
+Pitfalls regarding the "Saleae" logic analyzers: The cheap clones (~15 Euros, 8 channel), with 24MHz sampling rate, do NOT work, because this sampling
+rate is too slow to catch the 13MHz SPI clock. The "medium expensive clones (~70 Euros)", 16 channels, sometimes labeled "Logic 16", are working ok with the setting 32MS/s, but the clock signal is not as accurate as seen on an oscilloscope (should be 16 clock pulses per transaction, equally distributed).
+
 The protocol is explained in the AN4 application note from InTech / I2SE, see an4_rev5_QCA7000_application_note_with_protocol.pdf.
 The ethernet frames are visible in the above SPI trace after the 0xAAAAAAAA start-of-frame-markers, 2 bytes length information, 2 fill bytes.
 
