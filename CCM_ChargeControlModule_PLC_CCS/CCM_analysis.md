@@ -172,11 +172,28 @@ e.g. https://www.tme.eu/Document/90cf95a7114025302d33a68125e207ab/MX25L1606E.pdf
 
 ## How to read out the SPI flash memory U4?
 
-[CCM_SPIFLASH_readout_with_arduino.jpg](CCM_SPIFLASH_readout_with_arduino.jpg)
+![image](CCM_SPIFLASH_readout_with_arduino.jpg)
 
 Hold the QCA in reset, by connecting TP13 to ground.
 Connect an Arduino to the four SPI lines of the U4. Use the Arduino sketch Arduino_SpiFlash. (Adjust the memory size to read out and maybe the format as wanted.)
 Connect the power of the Arduino to the 3,3V (TP9). Do not power the Arduino externally. Store the output of the Arduinos serial to a file (e.g. using Putty on the COM port).
+
+## Memory dump of the SPI flash U4
+
+See [CCM_FlashDump_SpiFlash_2MB_Ioniq_00_33_79.s19](CCM_FlashDump_SpiFlash_2MB_Ioniq_00_33_79.s19). First analysis results:
+- 0x00'0140 to 0x00'240: Build version information (e.g. "QCA7000 MAC SW v1.1.0 Rev:04" ...)
+- 0x00'3BC0 ...: a lot of error message strings
+- 0x01'0200 Firmware version. Surprisingly, it reports a FW-QCA7420-1.1.0.730-04-CS-20140815, not a QCA7000 or 7005.
+- 0x06'3D40 End of the firmware
+- 0x0E'0000 Start of configuration block
+- 0x0E'0200 PIB version "PIB-QCA7420-1.1.0.730-05-CS-20140815"
+- 0x0E'0430 "YURA CCM SOP DEFAULT" (Yura is the module manufacturer, printed on the PCB and housing label)
+- 0x0E'4000 Again start of configuration block, with same (or similar?) content as above
+- 0x0F'0000 Again start of configuration block, with same (or similar?) content as above
+- 0x0F'4000 Again start of configuration block, with same (or similar?) content as above
+- 0x14'0000 Firmware identification block, similar (or same?) as on 0x01'0000.
+- 0x19'3D40 End of the second firmware
+
 
 # Car Integration
 ## Does the Ioniq complain if the CCM is not installed?
