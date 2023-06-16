@@ -151,6 +151,46 @@ consistent MAC on SPI and on PLC, only the paper label on the housing differs.
 
 ![image](CCM_on_bench_logic_analyzer_and_CAN_connected.jpg)
 
+### SPI frames
+
+When starting a charging session, we see the following sequence. The symbolic names are taken from the QCA7000 linux driver (https://github.com/qca/qca7000).
+
+- C2 00 00 00 Read, internal, reg 2 (WRBUF_SPC_AVA)
+- C2 00 00 00 Read, internal, reg 2 (WRBUF_SPC_AVA)
+- C2 00 00 00 Read, internal, reg 2 (WRBUF_SPC_AVA)
+- DA 00 00 00 Read, internal, reg 1A (SIGNATURE)
+- This repeats multiple times, until the response in the DA 00 00 00 is 3F FF FF FF.
+- CD 00 00 00 Read, internal, reg 0D (INTR_ENABLE)
+- 4D 00 00 00 Write, internal, reg 0D (INTR_ENABLE) disables the interrupt.
+- CC 00 00 00 -> * * 04 40 Read, internal, reg 0C (INTR_CAUSE)
+- DA 00 00 00 -> * * AA 55 This is the expected signature GOOD_SIGNATURE.
+- DA 00 00 00 -> * * AA 55 This is the expected signature GOOD_SIGNATURE.
+- C2 00 00 00 -> * * 0C 5B The first correct write buffer space available info.
+- 4C 00 04 40 Write, internal, reg 0C (INTR_CAUSE). Confirms all interrupt bits which have been seen above.
+- CD 00 00 00 -> * * 00 00 Read, internal, reg 0D (INTR_ENABLE)
+- 4D 00 00 47 Write, internal, reg 0D (INTR_ENABLE) enables some interrupts (SPI_INT_WRBUF_BELOW_WM, SPI_INT_WRBUF_ERR, SPI_INT_RDBUF_ERR, SPI_INT_PKT_AVLBL).
+- C2 00 00 00 Read, internal, reg 2 (WRBUF_SPC_AVA)
+- C2 00 00 00 Read, internal, reg 2 (WRBUF_SPC_AVA)
+- 41 00 00 58 Write, internal, reg 1 (BFR_SIZE)
+- 00 00 (Write, external) AA AA AA AA - 4E 00 00 00 (size)- 33 33 FF FF D3 E2 (dst MAC)- E0 0E E1 FF D3 E2 (src MAC) - 86DD (IPv6) - 60 00 00 00 - 0018 - 3A (ICMP) .... Neighbor Solicitation.
+
+This means, the CCM tries to find Neighbors in the network, even before the SLAC is started. Strange.
+
+- C2 00 00 00 Read, internal, reg 2 (WRBUF_SPC_AVA)
+- C2 00 00 00 Read, internal, reg 2 (WRBUF_SPC_AVA)
+- 41 00 00 46  Write, internal, reg 1 (BFR_SIZE)
+- 00 00 AA AA AA AA - 3C 00 00 00 - FF FF FF FF FF FF - E0 0E E1 FF D3 E2 -88E1 (homeplug) ... SlacParamReq
+- C2 00 00 00 Read, internal, reg 2 (WRBUF_SPC_AVA)
+- The CCM repeats the SlacParamReq each 210ms, until it sees a SlacParamCnf.
+- CD 00 00 00 -> * * 00 47 Read, internal, reg 0D (INTR_ENABLE)
+- 4D 00 00 00 -> Write, internal, reg 0D (INTR_ENABLE) 
+- CC 00 00 00 -> 47 47 04 01 Read, internal, reg 0C (INTR_CAUSE) SPI_INT_WRBUF_BELOW_WM, SPI_INT_PKT_AVLBL
+- C3 00 00 00 -> * * 00 4A Read, internal, reg 03 (RDBUF_BYTE_AVA) shows that 4A bytes are in receive buffer.
+- 41 00 00 4A  Write, internal, reg 1 (BFR_SIZE)
+- 80 00 (Read, external)  00 ..... --> * * 00 00 00 46 - AA AA AA AA - 3C 00 00 00 - E0 0E E1 FF D3 E2 - .... SlacParamCnf
+- 4C 00 04 01 Write, internal, reg 0C (INTR_CAUSE). This confirms the above seen interrupt flags.
+- CD 00 00 00 -> * * 00 00 Read, internal, reg 0D (INTR_ENABLE)
+
 ## Which are the other SPI signals, between the QCA and the Flash?
 - QCA.3 = data_in = TP16 = flash.2 = SO
 - QCA.65 = chipselect = TP12 = flash.1 = chipselect
