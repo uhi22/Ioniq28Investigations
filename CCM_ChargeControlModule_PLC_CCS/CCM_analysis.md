@@ -237,6 +237,9 @@ See [CCM_FlashDump_SpiFlash_2MB_Ioniq_00_33_79.s19](CCM_FlashDump_SpiFlash_2MB_I
 - 0x14'0000 Firmware identification block, similar (or same?) as on 0x01'0000.
 - 0x19'3D40 End of the second firmware
 
+Comparing to the content of another CCM (CCM_FlashDump_SpiFlash_2MB_Ioniq_00_64_C3.s19), the difference is quite small and only in the configuration
+blocks 0x0E'0360 and 0x0F'0360.
+
 
 # Car Integration
 ## Does the Ioniq complain if the CCM is not installed?
