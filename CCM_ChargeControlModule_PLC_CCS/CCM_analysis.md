@@ -220,6 +220,18 @@ e.g. https://www.tme.eu/Document/90cf95a7114025302d33a68125e207ab/MX25L1606E.pdf
 Hold the QCA in reset, by connecting TP13 to ground.
 Connect an Arduino to the four SPI lines of the U4. Use the Arduino sketch Arduino_SpiFlash. (Adjust the memory size to read out and maybe the format as wanted.)
 Connect the power of the Arduino to the 3,3V (TP9). Do not power the Arduino externally. Store the output of the Arduinos serial to a file (e.g. using Putty on the COM port).
+The created s19 (Motorola SRecord) file can be converted to binary using e.g. the srec_cat from https://srecord.sourceforge.net/:
+`"C:\Program Files\srecord\bin\srec_cat.exe" CCM_FlashDump_SpiFlash_2MB_Ioniq_00_33_79.s19 -Output CCM_FlashDump_SpiFlash_2MB_Ioniq_00_33_79.bin -Binary`
+
+Alternatively, a RaspberryPi may be used to read and write the SPI flash:
+https://www.rototron.info/recover-bricked-bios-using-flashrom-on-a-raspberry-pi/ 
+Make sure that SPI is enabled in the settings of the Raspberry.
+Install the flashrom tool: `sudo apt-get install flashrom`
+The docu of flashrom is here: https://www.flashrom.org/Flashrom
+Check whether the device is detected: `flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=2000 -V`
+
+For viewing the binary, a hex editor can be used, e.g. http://www.funduc.com/fshexedit.htm
+
 
 ## Memory dump of the SPI flash U4
 
