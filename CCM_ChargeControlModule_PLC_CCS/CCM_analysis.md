@@ -151,6 +151,22 @@ consistent MAC on SPI and on PLC, only the paper label on the housing differs.
 
 ![image](CCM_on_bench_logic_analyzer_and_CAN_connected.jpg)
 
+### Alpitronic HYC300 log
+
+spi_ioniq_alpiHYC300_SWIsued_2024-03-22_ok_stopOnCharger.csv.pcap
+
+* During the precharge, the ioniq requests 1A precharge current. This is the good case, not the bug which muxsan had in his implementation until March 2024.
+* The alpitronic does NOT report limit power at the beginning of the current demand loop. Three observations during this phase:
+    * The ioniq ramps up the EVTargetCurrent quite fast (starting with 1A, and ramping up ~1A per message, reaching 148A after 15s).
+    * The alpi nearly follows with EVSEPresentCurrent the request of the ioniq.
+    * The alpi reports max 229A and max 82kW, no limitation.
+Conclusion: This seems to be the "old" alpi software, which does NOT limit the power during ramp-up.
+
+Cross-links to the discussions:
+* https://www.goingelectric.de/forum/viewtopic.php?p=2203585#p2203585
+* Emiles observations on new alpitronic software https://www.goingelectric.de/forum/viewtopic.php?p=2202897#p2202897
+
+
 ### SPI frames
 
 When starting a charging session, we see the following sequence. The symbolic names are taken from the QCA7000 linux driver (https://github.com/qca/qca7000).
