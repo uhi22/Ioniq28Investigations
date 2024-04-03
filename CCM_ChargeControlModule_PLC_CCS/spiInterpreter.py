@@ -185,7 +185,7 @@ def readSpiTrace(inputFileName):
                 misoDecoder.byteSeen(miso, t)
                         
 
-strSpiTraceFileName = "spi_ioniq_alpiHYC150_Meitingen_twoSessions_2024-04-03_Ok.csv"
+strSpiTraceFileName = "spi_ioniq_alpiHYC150_makerspace_landsberg_left_small_2024-04-03_ok.csv"
 # parse the SPI trace and collect the network packets
 readSpiTrace(strSpiTraceFileName)
 # write the collected packets into pcap file
