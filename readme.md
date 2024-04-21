@@ -33,7 +33,7 @@ Found the CCM in this place in my 2018 Ioniq car: ![image](CCM_ChargeControlModu
 
 ### Inside the CCM
 
-see [CCM_ChargeControlModule_PLC_CCS/CCM_analysis.md](CCM_ChargeControlModule_PLC_CCS/CCM_analysis.md)
+see [CCM_ChargeControlModule_PLC_CCS/readme.md](CCM_ChargeControlModule_PLC_CCS/readme.md)
 
 ### Cross reference to the Kona (similar but not the same)
 

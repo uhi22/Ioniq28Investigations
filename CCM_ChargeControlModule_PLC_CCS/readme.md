@@ -35,6 +35,12 @@ The PCB is "sealed" with a kind of protection seal. But, fortunately, the can be
 
 Current consumption (when Power and Ignition are bridged): 9V/160mA or 13V/120mA
 
+## Unlocking of the connector
+
+![image](2024-04-21_Ioniq_CCM_connector_unlocking1.jpg)
+![image](2024-04-21_Ioniq_CCM_connector_unlocking2.jpg)
+
+
 # Main controller
 
 ## Which controller type is used?
