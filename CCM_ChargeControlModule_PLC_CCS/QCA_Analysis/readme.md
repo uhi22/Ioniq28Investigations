@@ -97,6 +97,42 @@ https://blog.adafruit.com/2019/11/20/open-source-ftdi-ft2232-jtag-and-uart-adapt
 
 The JTAG state machine: https://www.xjtag.com/about-jtag/jtag-a-technical-overview/
 
+Debug sequence at startup: https://www2.lauterbach.com/pdf/app_arm_jtag.pdf page 16 "Reset Considerations"
+
+Diving into JTAG (but for newer ARM) https://piolabs.com/blog/engineering/diving-into-arm-debug-access-port.html
+
+ARM926 https://developer.arm.com/documentation/ddi0198/e/signal-descriptions/jtag-signals
+ARM926 Reference manual: https://developer.arm.com/documentation/ddi0198/e/
+and https://ww1.microchip.com/downloads/en/DeviceDoc/ARM_926EJS_TRM.pdf
+
+ARM9EJ-S Technical Reference Manual https://www.google.de/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwip752jxeqGAxWk3QIHHffGA88QFnoECBQQAQ&url=https%3A%2F%2Fdocumentation-service.arm.com%2Fstatic%2F5e8e476f88295d1e18d3aecb%3Ftoken%3D&usg=AOvVaw0_nYlc2soQ_Z6WIbWdBBg9&opi=89978449
+and https://developer.arm.com/documentation/ddi0222/b/
+
+### DDI0222.pdf, Annex B
+
+- two scan chains
+- for performing memory access, scan chain (aka scan path) 1 is used.
+- The instruction register is four bits in length.
+- Instruction is set via JTAG TAP, states SHIFT-IR and then UPDATE-IR
+- Using instruction SCAN_N (0b0010) and SHIFT-DR and UPDATE-DR, select the scan path.
+- Scan chain 1 has 67 bits.
+- The 67 bits consist of INSTR[32], SYSPEED, WPTANDBKPT, unused[1] and RDATA/WDATA[32]
+- Bit 0 of RDATA/WDATA is the first which is shifted out.
+- INSTR has the same meaning as instruction bus, so this takes e.g. ARM instruction.
+- RDATA/WDATA has the same meaning as the data read/write bus between core and memory.
+- The debug state is entered by setting DBGRQ in the "debug control register" (6 bits wide).
+- The "debug control register" is register 0 of the EmbeddedICE-RT.
+- The registers of the EmbeddedICE-RT can be written and read via the scan chain 2.
+- This access contains 32 bit data, 5 bit address and a R/W bit.
+
+Procedure draft:
+- enter debug state, by setting ScanChain2.EmbeddedICE.DebugControlRegister.DBGRQ = 1
+- core does not execute instructions
+- provide instructions to the core via ScanChain1.INSTR
+
+
+
+
 ## JTAG scanner using arduino
 
 https://github.com/szymonh/JTAGscan
