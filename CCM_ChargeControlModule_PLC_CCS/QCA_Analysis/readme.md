@@ -128,7 +128,16 @@ and https://developer.arm.com/documentation/ddi0222/b/
 Procedure draft:
 - enter debug state, by setting ScanChain2.EmbeddedICE.DebugControlRegister.DBGRQ = 1
 - core does not execute instructions
+- check whether ARM or Thumb was active
+    - examine bit 4 of the EmbeddedICE.DebugStatusRegister
 - provide instructions to the core via ScanChain1.INSTR
+- From page B-20: With the processor in the ARM state, typically the first instruction to execute is:
+STMIA R0, {R0-R15}
+This instruction causes the contents of the registers to appear on the data bus. You can 
+then sample and shift out these values.
+
+Reading memory: "The state of the system memory can be fed back to the debug host by using system speed 
+load multiples and debug speed store multiples." (from page B-21)
 
 
 
@@ -171,7 +180,271 @@ The list ends at 0x3cb https://github.com/deadsy/pycs/blob/master/wip/idcode.py
 Same here: https://github.com/rdiez/Tools/blob/master/DecodeJtagIdcode/decode-jtag-idcode.pl and here
 https://github.com/Merimetso-Code/JTAG-Hacking/blob/main/jlookup.py
 
+But the JTAGscan seems to have a setup-sample issue. Using clear setup-sample-clock algorithm, the picture changes drastically:
+- Reading the IDCODE works also with faster clock.
+- The IDCODE is 0xB33B.
+1011 0011 0011 1011
+is
+1011: base familiy code
+001 1001 1101: manufacturer 0x19D, this would be 'Cogency Semiconductor' according to https://github.com/deadsy/pycs/blob/master/wip/idcode.py
+1: per standard one
+
 ## Next steps for JTAG access
 
 JTAG implementation (but without adaptive clocking): https://github.com/blackmagic-debug/blackmagic/blob/main/src/platforms/common/jtagtap.c
+
+## Special TDO
+
+The TDO only works stable (means: it reports 0b1000 in state shift-IR), if it is pulled high during power-on. If low during power-on,
+it works "shortly", but stays tristate afterwards.
+
+## The strange RTCK (aka RCLK)
+
+The name says that it is the return clock, to be used for adaptive clocking. But it is more:
+- After power-on-reset, when just trying to read what the data register shows after writing instructions 0 to 15, the RTCK
+is sometimes high, sometimes low, and sometimes tristate. The state change happens with falling edge of TCLK, which happens in
+state UPDATE-IR.
+- INSTR = 6 -> tristate
+- INSTR = 7 -> high
+- INSTR = 9 -> tristate
+- INSTR = 10 -> high
+
+# How to find out the real length of the instruction register?
+
+The reference manual DDI0222.pdf says that the instruction register is 4 bits. But seems not.
+- Assume a longer instruction register, e.g. 7 bits.
+- Send each possible instruction (0 to 127), and after each, read 32 bit from data register.
+- Observed: 4 results are always the same.
+- Conclusion: Two bits of the instruction are ignored. So the instruction register is 5 bits long.
+- Now reading the data register for each of the 32 instructions (while sending 0xFF00FF00) leads to:
+```
+                                     (feeding FF00FF00)          (feeding FFFFFFFF) (feeding 0)
+    0 -> oldInstruction is 1 data32 is 0x2E90778 <--- interesting  0xFAEDAB77        0x10000
+    1 -> oldInstruction is 1 data32 is 0x0                         0x0               0x0
+    2 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass           0xFFFFFFFE        0x0
+    3 -> oldInstruction is 1 data32 is 0xE58477 <--- interesting   0xFAE58277        0xE18477
+    4 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass           0xFFFFFFFE        0x0
+    5 -> oldInstruction is 1 data32 is 0x0                         0x0               0x0
+    6 -> oldInstruction is 1 data32 is 0x0                         0x0               0x8000 --> bit 15 is controllable inverted?
+    7 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass           0xFFFFFFFE        0x0
+    8 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass           0xFFFFFFFE        0x0
+    9 -> oldInstruction is 1 data32 is 0x0                         0x0               0x0
+    10 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    11 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    12 -> oldInstruction is 1 data32 is 0x0                        0x0               0x0
+    13 -> oldInstruction is 1 data32 is 0x0                        0x0               0x0
+    14 -> oldInstruction is 1 data32 is 0xB33B                     0xB33B            0xB33B   <--- IDCODE
+    15 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    16 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    17 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    18 -> oldInstruction is 1 data32 is 0x0                        0x0               0x0
+    19 -> oldInstruction is 1 data32 is 0x0                        0x0               0x0
+    20 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    21 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    22 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    23 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    24 -> oldInstruction is 1 data32 is 0x0                        0x8               0x0  -> bit 3 is controllable
+    25 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    26 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    27 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    28 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    29 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    30 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+    31 -> oldInstruction is 1 data32 is 0xFE01FE00 bypass          0xFFFFFFFE        0x0
+```
+
+# OpenOCD on Windows 10
+
+Download of openOCD windows binary: https://gnutoolchains.com/arm-eabi/openocd/
+
+Just unzip. No installation needed.
+Open a command line in OpenOCD-20231002-0.12.0\bin, and just run openocd.exe
+
+ 
+Initial setup:
+https://openocd.org/doc-release/html/Running.html#Simple-setup_002c-no-customization
+
+Interface config: e.g. take c232hm.cfg from the OpenOCD-20231002-0.12.0\share\openocd\scripts\interface\ftdi and copy it into the current directory.
+
+To avoid the command line arguments: create a openocd.cfg in the current directory with the content
+```
+    source [find c232hm.cfg]
+```
+
+But the FT232HQ device is not detected:
+```
+    Error: libusb_open() failed with LIBUSB_ERROR_NOT_SUPPORTED
+    Error: unable to open ftdi device with description '*', serial '*' at bus location '*'
+```
+Driver here: https://ftdichip.com/drivers/ but reports "everything already up to date".
+Further searching: there seems to be a "Zadig tool" which is necessary to configure the FTDI driver.
+https://medium.com/@manuel.bl/low-cost-esp32-in-circuit-debugging-dbbee39e508b
+and
+https://github.com/pbatard/libwdi/wiki/Zadig
+
+In the Zadig:
+* Menu->Options->List All Devices
+* Dropdown: select "Single RS232-HS" device. It shows driver "FTDIBUS (v2.12.36.4)
+* right of the green arrow, select "WinUSB" and click "Replace Driver".
+
+Try again openocd.exe. Success, the interface is found.
+
+But it complains that "transport is not selected", so we select JTAG (not SWD) by
+adding `transport select jtag` in the c232hm.cfg.
+
+Connecting the FT232HQ board to the QCA
+
+Success: By Autoprobing, it finds the 5-bits-instruction register:
+```
+    C:\UwesTechnik\OpenOCD-20231002-0.12.0\bin>openocd.exe
+    Open On-Chip Debugger 0.12.0 (2023-10-02) [https://github.com/sysprogs/openocd]
+    Licensed under GNU GPL v2
+    libusb1 09e75e98b4d9ea7909e8837b7a3f00dda4589dc3
+    For bug reports, read
+            http://openocd.org/doc/doxygen/bugs.html
+    jtag
+    Info : Listening on port 6666 for tcl connections
+    Info : Listening on port 4444 for telnet connections
+    Warn : An adapter speed is not selected in the init scripts. OpenOCD will try to run the adapter at very low speed (100 kHz).
+    Warn : To remove this warnings and achieve reasonable communication speed with the target, set "adapter speed" or "jtag_rclk" in the init scripts.
+    Info : clock speed 100 kHz
+    Warn : There are no enabled taps.  AUTO PROBING MIGHT NOT WORK!!
+    Info : TAP auto0.tap does not have valid IDCODE (idcode=0xfffffffe)
+    Warn : AUTO auto0.tap - use "jtag newtap auto0 tap -irlen 5 -expected-id 0x00000000"
+    Warn : gdb services need one or more targets defined
+```
+
+In the openocd.cfg, add `source [find qca7000.cfg]` and create this file.
+Add there what we know:
+`jtag newtap qca0tap tap -irlen 5 -expected-id 0x00000000`
+
+Also set a clock speed to avoid the warning. See https://openocd.org/doc-release/html/Debug-Adapter-Configuration.html#jtagspeed
+There is a hint regarding RCLK/adaptive clocking in https://openocd.org/doc-release/html/Config-File-Guidelines.html
+
+Good news: In general, the ARM9 and ARM926EJS is supported by the openOCD, we find it in https://openocd.org/doc-release/html/CPU-Configuration.html, and
+also a lot of target and board cfg files show the arm926.
+
+
+Intermediate summary:
+- The "outside" JTAG port works and shows a 5-bit instruction register, and no id-code after reset. This TAP does
+  not provide RTCK.
+- The ARM926 has a 4-bit-instruction register (and would have an id-code after reset?)
+- We observed also situations where RTCK followed the TCLK (only with very low frequency, 40ms cycle). Not clear how this state was reached.
+- So there seem to be at least to TAPs, and it needs to be found out how to reach the "inner TAP".
+
+Access of the "child nodes": https://openocd.org/doc/html/TAP-Declaration.html and https://review.openocd.org/c/openocd/+/8041 explains the option -ir-bypass NUMBER
+
+Low-level JTAG commands for finding out the structure of an unknown device are explained here: https://openocd.org/doc/html/JTAG-Commands.html
+
+How to enter the commands for openOCD?
+
+* Open puTTY.
+* Host name: localhost
+* Port: 4444
+* Connection type: Other -> Telnet
+
+
+
+irscan qca0tap.tap 14
+drscan qca0tap.tap 32 0
+
+```
+    Open On-Chip Debugger
+    > irscan qca0tap.tap 14
+    > drscan qca0tap.tap 32 0
+    0000b33b
+```
+
+Success: This reveals the same "idcode" from register 14 as seen with the arduino method.
+
+Observation: After power-on-reset, the Foccci consumes 130mA on the 3.3V. After two times reading the data register `drscan qca0tap.tap 32 0`, the current decreases to 80mA. Afterwards, the result of this is 00000000, and for the first two commands it was ffffffff.
+Same behavior:
+- no matter whether we use 1 bit, 8 bit, 32 bit or 64 bit or 128bit.
+
+```
+(power-on-reset here)
+> drscan qca0tap.tap 32 ffffffff 32 ffffffff 32 ffffffff 32 ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+> drscan qca0tap.tap 32 ffffffff 32 ffffffff 32 ffffffff 32 ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+(here the current drops from 130mA to 90mA)
+> drscan qca0tap.tap 32 ffffffff 32 ffffffff 32 ffffffff 32 ffffffff
+00000000
+00000000
+00000000
+00000000
+>
+```
+
+Checking patterns and different lengths reveals: after power-on, the data register is a 79 bit shift register.
+
+```
+(power-on-reset here)
+> drscan qca0tap.tap 16 0xAFFE 16 0xFEED 16 0xBEEF 16 0xDEAD 15 0x7fff 16 0 16 0 16 0 16 0 15 0
+0000
+0000
+0000
+0000
+0000
+affe
+feed
+beef
+dead
+7fff
+>
+```
+
+Register 0 is 27 bits wide:
+
+```
+(power-on-reset here)
+> irscan qca0tap.tap 0
+> drscan qca0tap.tap 27 0xaffe 27 0 27 0xaffe 27 0xdeadbe 27 0 27 0 27 0x7ffffff 27 0 27 0
+03692b6a
+0000affe
+00000000
+0000affe
+00deadbe
+00000000
+00000000
+07ffffff
+00000000
+>
+```
+
+Register 1:
+
+```
+(power-on-reset here)
+drscan qca0tap.tap 16 0xAFFE 16 0xFEED 16 0xBEEF 16 0xDEAD 15 0x7fff 16 0xAFFE 16 0xFEED 16 0xBEEF 16 0xDEAD 15 0x7fff
+drscan qca0tap.tap 16 0xAFFE 16 0xFEED 16 0xBEEF 16 0xDEAD 15 0x7fff 16 0xAFFE 16 0xFEED 16 0xBEEF 16 0xDEAD 15 0x7fff
+drscan qca0tap.tap 16 0xAFFE 16 0xFEED 16 0xBEEF 16 0xDEAD 15 0x7fff 16 0xAFFE 16 0xFEED 16 0xBEEF 16 0xDEAD 15 0x7fff
+irscan qca0tap.tap 1
+drscan qca0tap.tap 16 0 16 0 16 0 16 0 15 0
+(does NOT provide the data from the "unaddressed power-on register")
+drscan qca0tap.tap 16 0xAFFE 16 0xFEED 16 0xBEEF 16 0xDEAD 15 0x7fff 16 0xAFFE 16 0xFEED 16 0xBEEF 16 0xDEAD 15 0x7fff
+0000
+0000
+0000
+0000
+0000
+affe
+feed
+beef
+dead
+7fff -> confirms that also is register 1 is also 79 bits, but not the same content as the unaddressed.
+```
+
+In general, after power-on, the current reduces and the floating RCLK turns to low, if
+- two scan-dr or
+- two scan-ir or
+- a combinatin of one scan-dr and one scan-ir
+is sent.
+
 
