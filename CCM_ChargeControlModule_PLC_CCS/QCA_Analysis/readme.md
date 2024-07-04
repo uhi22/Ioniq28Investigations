@@ -587,7 +587,8 @@ Register 9:
 00000000
 00000000
 >
-``` -> all zeros. No length determination possible.
+```
+-> all zeros. No length determination possible.
 
 Register 12:
 ```
@@ -610,18 +611,20 @@ ffffffff
 00000000
 ffff8000
 ffffffff
-``` -> also 79 bits
+```
+-> also 79 bits
+
 This bit controls the current. off->80mA, on->150mA.
 In an other power cycle, the same bit switches between 90mA and 290mA.
-> drscan qca0tap.tap 32 0 32 0 32 0x1000 32 0
+`> drscan qca0tap.tap 32 0 32 0 32 0x1000 32 0`
 In an other power cycle, another bit controls the current bitween 80mA and 140mA.
-> drscan qca0tap.tap 32 0 32 0x1000 32 0
+`> drscan qca0tap.tap 32 0 32 0x1000 32 0`
 
 Selecting register 13 turned the high current off in these cases.
-1, 13 -> off, 12 -> stays off.
-0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17, 20, 21, 22, 23, 24, 25 -> temporary off, 12 -> high current again.
-12, 18, 19: high current (while 18 and 19 have ~20mA more than 12)
-19 activates the high current, which was blocked by the 1 or 13 instruction. Afterwards 12 and 18 work again to activate the current.
+- 1, 13 -> off, 12 -> stays off.
+- 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17, 20, 21, 22, 23, 24, 25 -> temporary off, 12 -> high current again.
+- 12, 18, 19: high current (while 18 and 19 have ~20mA more than 12)
+- 19 activates the high current, which was blocked by the 1 or 13 instruction. Afterwards 12 and 18 work again to activate the current.
 
 
 
@@ -631,14 +634,16 @@ Register 13:
 > irscan qca0tap.tap 13
 > drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
 .....
-``` -> 
+```
+-> to be found out
 
 Register 14:
 ```
 (power-on-reset here)
 > irscan qca0tap.tap 14
 > drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
-``` -> also 79 bits
+```
+-> also 79 bits
 
 Häää? This should be the ident????
 Again:
@@ -646,14 +651,16 @@ Again:
 (power-on-reset here)
 > irscan qca0tap.tap 14
 > drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff (lowers the current and the RCLK goes low)
-``` does NOT show the ident.
+```
+does NOT show the ident.
 
 ```
 (power-on-reset here)
 > drscan qca0tap.tap 32 0xffffffff
 > irscan qca0tap.tap 14 (lowers the current and the RCLK goes low)
 > drscan qca0tap.tap 32 0xffffffff
-``` does NOT show the ident.
+```
+does NOT show the ident.
 
 ```
 (power-on-reset here)
@@ -661,7 +668,8 @@ Again:
 > drscan qca0tap.tap 32 0xffffffff (lowers the current and the RCLK goes low)
 > irscan qca0tap.tap 14 
 > drscan qca0tap.tap 32 0xffffffff 
-``` 0xb33b.
+```
+0xb33b.
 
 
 Register 18:
