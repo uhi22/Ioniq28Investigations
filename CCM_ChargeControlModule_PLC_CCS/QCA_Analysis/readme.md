@@ -441,10 +441,363 @@ dead
 7fff -> confirms that also is register 1 is also 79 bits, but not the same content as the unaddressed.
 ```
 
+Register 3:
+
+```
+(power-on-reset here)
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff (current down)
+> irscan qca0tap.tap 3 (current sometimes increases, sometimes decreases by 10mA)
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+fb658462
+ffffffff
+ffffffff
+ffffffff
+```
+-> 27 bits. The results are stable in one power cycle, but differ a little bit after power cycle.
+
+Register 5:
+
+```
+(power-on-reset here)
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff (current down)
+> irscan qca0tap.tap 5 (no change in current)
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+```
+-> 79 bits. Reads all 0.
+
+Register 6:
+
+```
+(power-on-reset here)
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff (current down)
+> irscan qca0tap.tap 6 (current up again)
+> irscan qca0tap.tap 6
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+00000000
+00040000
+00000000
+00000000
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+00000000
+fff00000
+ffffffff
+03ffffff
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+00000000
+fff00000
+ffffffff
+03ffffff
+> drscan qca0tap.tap 32 0 32 0 32 0 32 0
+00000000
+fff00000
+ffffffff
+03ffffff
+> drscan qca0tap.tap 32 0 32 0 32 0 32 0
+00000000
+00040000
+00000000
+00000000
+>
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffff 32 0xffffffff
+00000000
+fc000000
+fc000003
+00000003
+fc000000
+ffffffff
+ffffffff
+ffffffff
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffff 32 0xffffffff
+00000000
+fff00000
+ffffffff
+0003ffff
+fc000000
+ffffffff
+ffffffff
+ffffffff
+> drscan qca0tap.tap 32 0 32 0 32 0 32 0 32 0 32 0 32 0 32 0
+00000000
+fff00000
+ffffffff
+0003ffff
+00000000
+00000000
+00000000
+00000000
+> drscan qca0tap.tap 32 0 32 0 32 0 32 0 32 0 32 0 32 0 32 0
+00000000
+00040000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+>
+```
+->
+- ~52 bits are fix 0. 1 bit changes sometimes.
+- ~62 bits are written and get back with the next command.
+- everything additional just shifted-thru
+
+Register 9:
+```
+(power-on-reset here)
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff (current down)
+> irscan qca0tap.tap 9 (no current change)
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+> drscan qca0tap.tap 32 0 32 0 32 0 32 0 32 0 32 0 32 0 32 0
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+> drscan qca0tap.tap 32 0 32 0 32 0 32 0 32 0 32 0 32 0 32 0
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+>
+``` -> all zeros. No length determination possible.
+
+Register 12:
+```
+(power-on-reset here)
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff (current down)
+> irscan qca0tap.tap 12 (massive current increase, sometimes from 80mA to 260mA. Sometimes 160mA, sometimes lower)
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+00000000
+00000000
+ffff8000
+ffffffff
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+00000000
+00000000
+ffff8000
+ffffffff
+``` -> also 79 bits
+This bit controls the current. off->80mA, on->150mA.
+In an other power cycle, the same bit switches between 90mA and 290mA.
+> drscan qca0tap.tap 32 0 32 0 32 0x1000 32 0
+In an other power cycle, another bit controls the current bitween 80mA and 140mA.
+> drscan qca0tap.tap 32 0 32 0x1000 32 0
+
+Selecting register 13 turned the high current off in these cases.
+1, 13 -> off, 12 -> stays off.
+0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17, 20, 21, 22, 23, 24, 25 -> temporary off, 12 -> high current again.
+12, 18, 19: high current (while 18 and 19 have ~20mA more than 12)
+19 activates the high current, which was blocked by the 1 or 13 instruction. Afterwards 12 and 18 work again to activate the current.
+
+
+
+Register 13:
+```
+(power-on-reset here)
+> irscan qca0tap.tap 13
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+.....
+``` -> 
+
+Register 14:
+```
+(power-on-reset here)
+> irscan qca0tap.tap 14
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+``` -> also 79 bits
+
+Häää? This should be the ident????
+Again:
+```
+(power-on-reset here)
+> irscan qca0tap.tap 14
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff (lowers the current and the RCLK goes low)
+``` does NOT show the ident.
+
+```
+(power-on-reset here)
+> drscan qca0tap.tap 32 0xffffffff
+> irscan qca0tap.tap 14 (lowers the current and the RCLK goes low)
+> drscan qca0tap.tap 32 0xffffffff
+``` does NOT show the ident.
+
+```
+(power-on-reset here)
+> drscan qca0tap.tap 32 0xffffffff
+> drscan qca0tap.tap 32 0xffffffff (lowers the current and the RCLK goes low)
+> irscan qca0tap.tap 14 
+> drscan qca0tap.tap 32 0xffffffff 
+``` 0xb33b.
+
+
+Register 18:
+```
+(power-on-reset here)
+> irscan qca0tap.tap 18
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+```
+Register 19:
+```
+(power-on-reset here)
+> irscan qca0tap.tap 19
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+```
+Register 24:
+```
+(power-on-reset here)
+> irscan qca0tap.tap 24
+> drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xffffffff
+```
+
+
+### Re-activation of the PLC communication
+
+by writing IR. Example: reset, DR, DR leads to deactivation of the PLC communication. The
+PLC communication can be re-activated by IR=23, but only in certain preconditions. E.g. IR=24 IR=23
+works.
+
+- 0, 23 no
+- 1, 23 no
+- 2, 23 no
+- 3, 23 no
+- 4, 23 no
+- 5, 23 no
+- 6, 23 yes
+- 7, 23 yes
+- 8, 23 yes
+- 9, 23 yes
+- 10 does not even disable the communication. 0, 10, 23 does NOT enable the PLC communication.
+- 11, 23 yes
+- 12, 23 no
+- 13, 23 yes
+- 14 similar to 10. No disable PLC, no enable. Reading the DR value 0xb33b works while PLC is working.
+- 15, 23 yes
+- 16 No disable PLC. Enables PLC when it was disabled with 15. But does not enable with sequence 0, 15, 16.
+     Rescued with 15, 24, 23 -> PLC works again.
+- 17, 23 yes
+- 18, 23 no. 18 causes high current. Rescued with 24, 23 -> PLC works again.
+- 19, 23 no. 19 causes high current. Rescued with 24, 23 -> PLC works again.
+- 20, 23 no. PLC stuck after some tests with different combination. Rescued with 13, 24, 23.
+- 21 does not stop PLC
+- 22 does not stop PLC
+- (23 depends on the preconditions)
+- 24, 23 yes
+- 25 and 26 and 27 and 28 similar to 10. No disable PLC, no enable.
+- 29, 23 yes
+- 30 and 31 similar to 10. No disable PLC, no enable.
+
+## Entry sequence after power on
 In general, after power-on, the current reduces and the floating RCLK turns to low, if
 - two scan-dr or
 - two scan-ir or
 - a combinatin of one scan-dr and one scan-ir
 is sent.
+Also the PLC communication stops at this point.
+
+## Analog supply control
+The 1.6V on the TX and RX path are shifting independent. E.g.
+IR=1 both off
+IR=24 TX on, RX off
+TR= .... 19: both on
+
+## Pin control
+The INT, R3(GPIO1) and R4(GPIO2) can be controlled together by this sequence:
+DR-DR-IR1-IR2-IR3-IR2-IR4-IR2
+
+The GPIO2 can be controlled by writing DR without any IR.
+power on
+drscan qca0tap.tap 32 0 32 0x100000 32 0 32 0 (first ignored, but necessary)
+drscan qca0tap.tap 32 0 32 0x100000 32 0 32 0 (second ignored, but necessary. Turns INT, GPIO1 and GPIO2 to weak low)
+drscan qca0tap.tap 32 0 32 0x100000 32 0 32 0 high
+drscan qca0tap.tap 32 0 32 0x000000 32 0 32 0 low
+
+Further pin controls
+(outputs observed: INT.GPIO1.GPIO2.RX.TX)
+
+- power-on-reset
+- drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff
+- drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff (outputs 11100)
+- irscan qca0tap.tap 0 (outputs 10001, sometimes 00001)
+
+- drscan qca0tap.tap 32 0x080 This bit controls the output enable of the GPIO1 (changes between weak and strong low).
+- drscan qca0tap.tap 32 0x100 GPIO1 = H
+- drscan qca0tap.tap 32 0x180 GPIO1 = float
+- drscan qca0tap.tap 32 0x000 GPIO1 = L
+- drscan qca0tap.tap 32 0x080 GPIO1 = float
+
+- drscan qca0tap.tap 32 0x200 GPIO2 = H (or float, to be measured)
+- drscan qca0tap.tap 32 0x400 GPIO2 = H (or float, to be measured)
+
+- drscan qca0tap.tap 32 0x2000 FL_CS changes to H (or pull-up?)
+- drscan qca0tap.tap 32 0x4000 FL_CS changes to H (or pull-up?)
+- drscan qca0tap.tap 32 0x8000 FL_MOSI changes to H
+- drscan qca0tap.tap 32 0x80000 FL_MISO changes to H
+- (not found a bit which would control the FL_CLK)
+
+- drscan qca0tap.tap 32 0x10000000 INT changes to high impedance
+- drscan qca0tap.tap 32 0x20000000 INT changes to H
+
+### Reading pin state
+
+Preparation:
+- power-on-reset
+- drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff
+- drscan qca0tap.tap 32 0xffffffff 32 0xffffffff 32 0xffffffff (outputs 11100)
+- irscan qca0tap.tap 0 (outputs 10001, sometimes 00001)
+
+Actual reading:
+- drscan qca0tap.tap 32 0x10000000 (control INT to tristate)
+- 00810000 when INT is externally pulled low
+- drscan qca0tap.tap 32 0x10000000 (control INT to tristate)
+- 01810000 when INT is externally pulled high
+
+- drscan qca0tap.tap 32 0xffffffff (control all to tristate)
+- fbedab77 when GPIO1 is low
+- drscan qca0tap.tap 32 0xffffffff
+- fbedab7f when GPIO1 is high
+
+Conclusions:
+* IR=0 selects a scan path for reading and writing the pins.
+* The pins have two control bits, which select between H, L and tristate.
+* The read-back state (H or L) is at the higher bit position.
+
+## Controlling openOCD from python
+
+docu: https://gitlab.zapb.de/openocd/python-openocd
+installation from cmd: pip install openocd
 
 
