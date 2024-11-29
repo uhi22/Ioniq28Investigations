@@ -2,26 +2,23 @@
 
 Contains the motor inverter and the 12V DCDC
 
-Discussion and some pictures here: https://www.goingelectric.de/forum/viewtopic.php?f=116&t=93269
-
-
 The main controller board and parts of the inverter gate driver board:
 
 ![image](20240624_EPCU_opened.jpg)
 
-# Controller board
+## Controller board
 
 - Black connector to DCDC boards
-- big white connector to the inverter gate driver board
-- small white connector maybe case temperature sensors
-- 4x16 pin connector to the cable harness
+- big white connector CN1005 to the inverter gate driver board
+- small white connector CN1004 to the phase current sensors
+- 4x16 pin connector CN1000 to the cable harness
 
-# Gate driver board
+## Gate driver board
 
 - 6 gate drivers, 32 pin
 - The IGBTs have 4 pins, e.g. UNG, UNE, UNS, UNA (for the U phase, Negative side). 
 
-# DCDC (LVDC)
+## DCDC (LVDC)
 
 The DCDC converter boards, with transformator and choke in between:
 
@@ -51,9 +48,18 @@ Secondary side:
 - voltage probing via CN200 pin 1 (white, ground) and 4 (violet, 12V)
 - low voltage ground is directly the aluminium case
 
+## Phase Current Sensor
 
-# References
+8-pin-connector, 6 wires used.
+
+## DC capacitor
+
+The ports for the input, LVDC, IGBT module and discharge resistor are just connected in parallel.
+The discharge resistor has 70kohm / 10W. It causes 5mA or 1.75W at 350V.
+
+
+## References
 
 * Ref1 some reverse-engineered pin-outs https://openinverter.org/forum/viewtopic.php?p=77179#p77179
 * Ref2 unsorted collection of pictures of the EPCU https://hnng.de/ioniq/pics/epcu/
-
+* Ref3 Discussion and some pictures on the goingelectric forum https://www.goingelectric.de/forum/viewtopic.php?f=116&t=93269
