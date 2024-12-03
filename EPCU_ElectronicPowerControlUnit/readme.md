@@ -26,11 +26,35 @@ The main controller board and parts of the inverter gate driver board:
 - M2+N2 spare CAN, not populated L9003, U9005.
 - P2, Q2 GND
 
+- C3 accelerator pedal redundant 0.5V to 2V
+- D3 5V accelerator pedal supply 5V
+- E3 5V accelerator pedal supply 5V
+- F3 accelerator pedal main 1V to 4V
+
 - P3 wakeup line. 12V to enable the power supply of the board.
 - Q3 12V
 
+- D4 GND accelerator pedal
+- E4 GND accelerator pedal
 - F4, G4 bus choke L2601
 - P4, Q4 12V
+
+#### Accelerometer pedal
+
+Using 4.7kohm potis works. Pin F3 is the "main" input. Its value is reflected into CAN.VCU200.byte4 after power-up.
+Pin C3 acts as "redundancy for plausibilization". If both pins come to different conclusions, the CAN value changes to 255 ("invalid") after
+~2s. Sometimes, before reaching "invalid", the CAN value shows shortly the value of the redundancy pot. This helps debugging.
+If the value reached the error value 255, a power-off-on heals the situation.
+
+```
+CAN   U1[V]  U2[V]
+  0   0.96   0.58  
+ 10   1.07   0.60
+ 50   1.58   0.75
+100   2.17   1.11
+200   3.30   1.50
+254   3.97   2.00
+```
 
 ### Power Supply
 
@@ -47,18 +71,23 @@ By connecting CN1000.P3 and Q3 to 12V, the EPCU starts to draw power (400mA at 1
 The EPCU contains two external available CAN busses, and two internal control units (Motor Controller "MCU" and Vehicle Controller "VCU"). Both
 control units are connected to both CAN busses, so the EPCU has four CAN transceivers.
 
-"Left CAN" TP9004:
+"Left CAN, CCP-CAN" TP9004:
 ```
 0x2C1 in 1ms cycle with 00 00 FF 7F 00 00 00 00 
 0x232 in 1ms cycle with 00 00 00 00 00 00 00 00 
 0x58F in 100ms cycle with 08 40 00 00 00 00 40 1F 
 ```
 
-"Right CAN" TP 9008: A lot of messages, 0x109, 0x200, 0x201, 0x202, 0x291, 0x2A1, 0x523, 0x524, 0x540, 0x549, 0x579, 0x57A, 0x57B, 0x590, 0x592, 0x5DC, 0x5DE
+"Right CAN, PCAN" TP 9008: A lot of messages, 0x109, 0x200, 0x201, 0x202, 0x291, 0x2A1, 0x523, 0x524, 0x540, 0x549, 0x579, 0x57A, 0x57B, 0x590, 0x592, 0x5DC, 0x5DE
 
 
-Todo: Measure on the TX pin of each transceiver, which control unit sends which data on which CAN.
+Measure on the TX pin of each transceiver, which control unit sends which data on which CAN. How to find out, which CAN transceiver
+is connected to which controller? Stop a controller by shorting the xtal.
 
+* U9000 TX (pin1): 0x2C1
+* U9001 TX (pin1): 0x232, 0x58F
+* U9002 TX (pin1): 0x291, 0x2A1, 0x523, 0x524, 0x540, 0x5DC, 0x5DE. Stopping the MCU stops these messages.
+* U9003 TX (pin1): 0x109, 0x200, 0x201, 0x202, 0x549, 0x579, 0x57A, 0x57B, 0x590, 0x592. Stopping the VCU stops these messages.
 
 ## Gate driver board
 
