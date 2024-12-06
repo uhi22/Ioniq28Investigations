@@ -89,6 +89,91 @@ is connected to which controller? Stop a controller by shorting the xtal.
 * U9002 TX (pin1): 0x291, 0x2A1, 0x523, 0x524, 0x540, 0x5DC, 0x5DE. Stopping the MCU stops these messages.
 * U9003 TX (pin1): 0x109, 0x200, 0x201, 0x202, 0x549, 0x579, 0x57A, 0x57B, 0x590, 0x592. Stopping the VCU stops these messages.
 
+### Diagnostic Communication
+
+Test setup: EPCU standalone on the desk. CAN connected to wifican/SavvyCAN for observation, and to a bluetooth ELM327 / mobile phone for diagnostics.
+
+1. Using Car Scanner App on mobile phone, with Hyundai Ioniq profile. Result: Car Scanner sends on ID 0x7E4 the request 02 21 02 [00 00 00 00 00], and does not get a response. It complains, that the connection to the car could not be established. No reading of DTCs is possible.
+
+2. Using TorquePro app on mobile phone, with Hyundai Ioniq profile. Results:
+- TorquePro sends different requests on 0x7DF, e.g. 02 01 0C and 02 01 0D. Often no response. For some requests e.g. 02 01 00 there is 7EB response 06 41 00 80 00 00 01 00. And for 02 01 20 the response 06 41 20 80 01 80 00 00.
+Also
+```
+000007DF  3,8,01,03,00,00,00,00,00,00,
+000007EB  3,8,02,43,00,00,00,00,00,00,
+```
+
+- 7DF seems to be a broadcast, it leads to responses from multiple control units:
+```
+000007DF,false,Rx,3,8,01,07,00,00,00,00,00,00,
+000007EB,false,Rx,3,8,02,47,00,00,00,00,00,00,
+000007EA,false,Rx,3,8,02,47,00,00,00,00,00,00,
+```
+
+The broadcast request for 13 FF gives negative responses from both, with NRC 12:
+```
+000007DF,false,Rx,3,8,03,13,FF,00,00,00,00,00,
+000007EB,false,Rx,3,8,03,7F,13,12,00,00,00,00,
+000007EA,false,Rx,3,8,03,7F,13,12,00,00,00,00,
+```
+
+The broadcast request for 18 00 00 FF gives positive responses from both:
+```
+000007DF,false,Rx,3,8,04,18,00,FF,00,00,00,00,
+000007EA,false,Rx,3,8,10,14,58,06,C1,11,44,C1, first frame, len 0x14. The 58 is the positive response code for request 18.
+000007E2,false,Rx,3,8,30,00,00,00,00,00,00,00, flow control
+
+000007EB,false,Rx,3,8,10,29,58,0D,0A,0D,E0,0A, first frame, len 0x29. The 58 is the positive response code for request 18.
+000007E3,false,Rx,3,8,30,00,00,00,00,00,00,00, flow control
+
+000007EA,false,Rx,3,8,21,  46,44,C1,64,44,D3,10,
+000007EA,false,Rx,3,8,22,  44,D1,12,44,D0,17,44,
+
+000007EB,false,Rx,3,8,21,  2D,E0,0A,41,E0,0A,8B,
+000007EB,false,Rx,3,8,22,  E0,0A,EF,E0,0B,E6,E0,
+000007EB,false,Rx,3,8,23,  0B,E7,E0,0B,EA,E0,0B,
+000007EB,false,Rx,3,8,24,  EB,E0,0C,F1,20,C1,11,
+000007EB,false,Rx,3,8,25,  E0,C1,9B,E0,D1,16,E0,
+```
+
+The assembled response from 7EB service 18:
+
+```
+0D,       number of DTCs. 13 in this case.
+0A,0D,E0, in TorquePro "P0A0D". Web: "P0A0D High Voltage System Interlock Circuit High"
+0A,2D,E0, in TorquePro "P0A2D". Web: Drive Motor "A" Temperature Sensor Circuit Low
+0A,41,E0, in TorquePro "P0A41". Web: Drive Motor "A" Position Sensor Circuit Low
+0A,8B,E0, in TorquePro "P0A8B". Web: "14 Volt Power Module System Voltage"
+0A,EF,E0, Web: Drive Motor Inverter Temperature Sensor "A" Circuit Low
+0B,E6,E0, Web: Drive Motor "A" Phase U Current Sensor Circuit Range/Performance
+0B,E7,E0, Web: Drive Motor "A" Phase U Current Sensor Circuit Low
+0B,EA,E0, Web: Drive Motor "A" Phase V Current Sensor Circuit Range/Performance
+0B,EB,E0, Web: Drive Motor "A" Phase V Current Sensor Circuit Low
+0C,F1,20, "P0CF1". Web: P0C88 to PCFF are ISO/SAE Reserved
+C1,11,E0, in TorquePro "U0111". Web: Data bus: battery energy control module A - no  communication
+C1,9B,E0, in TorquePro "U019B". Web: not specified, but in the "no communication" area.
+D1,16,E0, in TorquePro "U1116". Web: not specified, but in the "no communication" area.
+```
+
+The assembled response from 7EA service 18:
+```
+06,        number of DTCs
+C1,11,44, in TorquePro "U0111". Web: Data bus: battery energy control module A - no  communication
+C1,46,44, U0146 Web: Data bus: gateway A- no communication
+C1,64,44, U0164 Web: Data bus: NC control module - no communication
+D3,10,44, U1310 Web: not specified, but in the "invalid data" area.
+D1,12,44, U1112 Web: SCP (J1850) Invalid or Missing Data for Primary Id
+D0,17,44, U1017 Web: SCP (J1850) Invalid or Missing Data for Primary Id
+```
+
+
+
+Web infos from https://www.troublecodes.net/pcodes/ and https://www.troublecodes.net/ucodes/
+
+- TorquePro sends requests on 0x7C6, 03 22 B0 02. No response.
+- 7E2 request leads to 7EA response, e.g. 7E2 01 21 01 --> 7EA 10 16 01 FF E0 00 00 and more (segmented ISO-TP frame).
+- 7E4 different requests, e.g. 02 21 01 and 02 21 05. No response.
+
 ## Gate driver board
 
 - 6 gate drivers, 32 pin
