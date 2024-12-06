@@ -96,21 +96,34 @@ Test setup: EPCU standalone on the desk. CAN connected to wifican/SavvyCAN for o
 1. Using Car Scanner App on mobile phone, with Hyundai Ioniq profile. Result: Car Scanner sends on ID 0x7E4 the request 02 21 02 [00 00 00 00 00], and does not get a response. It complains, that the connection to the car could not be established. No reading of DTCs is possible.
 
 2. Using TorquePro app on mobile phone, with Hyundai Ioniq profile. Results:
-- TorquePro sends different requests on 0x7DF, e.g. 02 01 0C and 02 01 0D. Often no response. For some requests e.g. 02 01 00 there is 7EB response 06 41 00 80 00 00 01 00. And for 02 01 20 the response 06 41 20 80 01 80 00 00.
+- TorquePro sends different requests on 0x7DF, e.g. 02 01 0C and 02 01 0D. Often no response.
+For some requests e.g. 02 01 00 there is 7EB response 06 41 00 80 00 00 01 00.
+This means, according to https://en.wikipedia.org/wiki/OBD-II_PIDs
+Service 1 "Show current data", PID 00 "PIDs supported". Response is a 4 byte bit mask, 80 00 00 01, which shows that two bits are set (bit 31 and bit 0), and this means that PID 01 and PID 20 are supported.
+PID 01 is "Monitor status since DTCs cleared."
+
+PID 20 is "PIDs supported [$21 - $40]". For 02 01 20 the response 06 41 20 80 01 80 00 00. So the bit mask is 80 01 80 00. This means, the
+PIDs 21 (Distance traveled with malfunction indicator lamp (MIL) on), 30 (Warm-ups since codes cleared), 31 (Distance traveled since codes cleared) are supported.
+
 Also
 ```
-000007DF  3,8,01,03,00,00,00,00,00,00,
-000007EB  3,8,02,43,00,00,00,00,00,00,
+000007DF  3,8,01,03,00,00,00,00,00,00, is service 03 "Show stored Diagnostic Trouble Codes"
+000007EB  3,8,02,43,00,00,00,00,00,00, is positive response to service 03. Value 00.
 ```
+
 
 - 7DF seems to be a broadcast, it leads to responses from multiple control units:
 ```
-000007DF,false,Rx,3,8,01,07,00,00,00,00,00,00,
+000007DF,false,Rx,3,8,01,07,00,00,00,00,00,00, is service 07 "Show pending Diagnostic Trouble Codes (detected during current or last driving cycle)"
 000007EB,false,Rx,3,8,02,47,00,00,00,00,00,00,
 000007EA,false,Rx,3,8,02,47,00,00,00,00,00,00,
 ```
 
-The broadcast request for 13 FF gives negative responses from both, with NRC 12:
+The broadcast request for 13 FF gives negative responses from both, with NRC 12 "SubFunctionNotSupported-InvalidFormat".
+The NRCs are described here: https://www.smart-wiki.net/_media/452/elektrik/iso14230-4-2000.pdf
+Service 13 is "ReadDiagnosticTroubleCodes" according to
+KWP2000 (ISO14230): https://cdn.standards.iteh.ai/samples/23921/cf3d017bc6b94cce9262c5caf8d47eea/ISO-14230-3-1999.pdf
+
 ```
 000007DF,false,Rx,3,8,03,13,FF,00,00,00,00,00,
 000007EB,false,Rx,3,8,03,7F,13,12,00,00,00,00,
@@ -166,13 +179,23 @@ D1,12,44, U1112 Web: SCP (J1850) Invalid or Missing Data for Primary Id
 D0,17,44, U1017 Web: SCP (J1850) Invalid or Missing Data for Primary Id
 ```
 
-
+The control unit supports some parts of the "OBD-II standard SAE J1979", but this standard defines only the services 01 to 0A.
+The service 18 is "ReadDiagnosticTroubleCodesByStatus" in KWP2000. It is not an UDS service (https://de.wikipedia.org/wiki/Unified_Diagnostic_Services).
 
 Web infos from https://www.troublecodes.net/pcodes/ and https://www.troublecodes.net/ucodes/
 
 - TorquePro sends requests on 0x7C6, 03 22 B0 02. No response.
 - 7E2 request leads to 7EA response, e.g. 7E2 01 21 01 --> 7EA 10 16 01 FF E0 00 00 and more (segmented ISO-TP frame).
 - 7E4 different requests, e.g. 02 21 01 and 02 21 05. No response.
+
+
+Conclusions for Diagnostic Communication:
+
+- The EPCU supports on the PCAN some OBD2 services and some KWP2000 services. No UDS services seen.
+- The EPCU reacts on broadcast requests on 7DF.
+- The two controllers of the EPCU have separate ID pairs.
+    - Vehicle controller (VCU) 7E2 -> 7EA
+    - Motor controller (MCU) 7E3 -> 7EB.
 
 ## Gate driver board
 
