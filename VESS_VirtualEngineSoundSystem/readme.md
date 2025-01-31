@@ -10,7 +10,7 @@ Reads the speed and the gear selection from CAN, and sends an engine sound and r
 ![image](VESS_20250131_06_controller.jpg)
 ![image](VESS_20250131_07_yamaha_sound.jpg)
 ![image](VESS_20250131_08.jpg)
-![image](VESS_20250131_09_ NCV8141_linear_regulator.jpg)
+![image](VESS_20250131_09_NCV8141_linear_regulator.jpg)
 ![image](VESS_20250131_10_pcb_backside.jpg)
 ![image](VESS_20250131_11_pcb_frontside.jpg)
 
@@ -25,10 +25,10 @@ Reads the speed and the gear selection from CAN, and sends an engine sound and r
 - 4 (vio) VESS button to ground
 - 5 (red) +12V
 - 6 (white) VESS speaker +
-- 7
-- 8
+- 7 nc
+- 8 nc
 - 9 (black) ground
-- 10
+- 10 nc
 - 11 (blue) VESS LED to ground
 - 12 (brown) VESS speaker -
 
