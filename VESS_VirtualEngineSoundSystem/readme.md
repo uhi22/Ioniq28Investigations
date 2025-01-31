@@ -8,8 +8,13 @@ Reads the speed and the gear selection from CAN, and sends an engine sound and r
 ![image](VESS_20250131_04.jpg)
 ![image](VESS_20250131_05_audioamp.jpg)
 ![image](VESS_20250131_06_controller.jpg)
+
+YAMAHA YMF827B see Ref6
 ![image](VESS_20250131_07_yamaha_sound.jpg)
+
+SPI Flash SPANSION FL116 KVF01 (or KVE01?) S25FL116K 16 MBit see Ref5
 ![image](VESS_20250131_08.jpg)
+
 ![image](VESS_20250131_09_NCV8141_linear_regulator.jpg)
 ![image](VESS_20250131_10_pcb_backside.jpg)
 ![image](VESS_20250131_11_pcb_frontside.jpg)
@@ -44,3 +49,5 @@ Reads the speed and the gear selection from CAN, and sends an engine sound and r
 * Ref2 goingelectric: installation position of VESS control unit and speaker
 * Ref3 schematic of the VESS integration https://service.hyundai-motor.com/UPLOAD/data/Passenger/HY/HME/DEU/ETM-IMAGES/HY-AE22-IMAGES-DEU/eaeevsd17314ag.svg
 * Ref4 internal block diagram of the VESS https://www.goingelectric.de/forum/viewtopic.php?p=540312#p540312
+* Ref5 data sheet of the SPI flash https://www.mouser.com/datasheet/2/380/S25FL116K_00-274912.pdf?srsltid=AfmBOooF0maW2Ar8tsxoBHCp190RUxyHD0BjgixwFOKB7HmAxDmbMZNP
+* Ref6 sound generator YAMAHA https://device.yamaha.com/en/lsi/products/sound_generator/
