@@ -39,6 +39,16 @@ SPI Flash SPANSION FL116 KVF01 (or KVE01?) S25FL116K 16 MBit see Ref5
 
 ## CAN communication
 
+The VESS transmits on CAN with 500kBaud.
+It sends the message 5E3, 8 bytes, all zero. Cycle time is 1 second. This is the same as observed on the Kona in Ref1.
+
+According Ref1, the Kona VESS needs just these messages to provide a sound:
+```
+200 : 00 28 00 10 00 3B D0 00 for gear
+524 : 60 01 02 40 5A 01 C0 02 for speed
+```
+The Ioniq VESS is still silent, if we sent these messages with 100ms cycle time.
+
 
 ### Diagnostic Communication
 
