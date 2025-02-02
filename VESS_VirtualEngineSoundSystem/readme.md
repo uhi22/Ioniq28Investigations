@@ -148,7 +148,10 @@ In contrast, the "old" SW1.00 unit has a different layout of the samples. It doe
 
 Demonstration (MP3 export) [vess_ioniq_sw100_orig.mp3](vess_ioniq_sw100_orig.mp3).
 
+### Is it possible to change the sound?
 
+Yes. Example: In Audacity change the volume and the pitch of the reverse gear bing. Then File -> Export -> other uncompressed files -> Header: raw (headerless), Encoding signed 16-bit PCM, file name `vess_ioniq_sw101_binglower.bin`. This should give an exactly 2MByte file, which could be flashed using
+`flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=2000 -w vess_ioniq_sw101_binglower.bin`
 
 ## References
 
