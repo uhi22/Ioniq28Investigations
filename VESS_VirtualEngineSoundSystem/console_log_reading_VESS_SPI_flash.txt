@@ -1,0 +1,33 @@
+pi@RPi2023:~ $ flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=2000
+flashrom v1.2 on Linux 6.1.21-v7+ (armv7l)
+flashrom is free software, get the source code at https://flashrom.org
+
+Using clock_gettime for delay loops (clk_id: 1, resolution: 1ns).
+Found Spansion flash chip "S25FL116K/S25FL216K" (2048 kB, SPI) on linux_spi.
+===
+This flash part has status UNTESTED for operations: PROBE READ ERASE WRITE
+The test status of this chip may have been updated in the latest development
+version of flashrom. If you are running the latest development version,
+please email a report to flashrom@flashrom.org if any of the above operations
+work correctly for you with this flash chip. Please include the flashrom log
+file for all operations you tested (see the man page for details), and mention
+which mainboard or programmer you tested in the subject line.
+Thanks for your help!
+No operations were specified.
+pi@RPi2023:~ $ flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=2000 -r vess101orig.bin
+flashrom v1.2 on Linux 6.1.21-v7+ (armv7l)
+flashrom is free software, get the source code at https://flashrom.org
+
+Using clock_gettime for delay loops (clk_id: 1, resolution: 1ns).
+Found Spansion flash chip "S25FL116K/S25FL216K" (2048 kB, SPI) on linux_spi.
+===
+This flash part has status UNTESTED for operations: PROBE READ ERASE WRITE
+The test status of this chip may have been updated in the latest development
+version of flashrom. If you are running the latest development version,
+please email a report to flashrom@flashrom.org if any of the above operations
+work correctly for you with this flash chip. Please include the flashrom log
+file for all operations you tested (see the man page for details), and mention
+which mainboard or programmer you tested in the subject line.
+Thanks for your help!
+Reading flash... done.
+pi@RPi2023:~ $ 

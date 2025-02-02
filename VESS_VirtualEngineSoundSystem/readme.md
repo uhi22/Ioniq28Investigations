@@ -37,6 +37,21 @@ SPI Flash SPANSION FL116 KVF01 (or KVE01?) S25FL116K 16 MBit see Ref5
 - 11 (blue) VESS LED to ground
 - 12 (brown) VESS speaker -
 
+## How to find / unmount it in the car?
+
+- Turn and pull the two stoppers of the glove box.
+- Pull the two hinge bolts of the glove box. Now the glovebox can be removed.
+- Behind the glove box there are two silver screws (10mm wrench). Remove these.
+- Under the glove box there is a kind of "flap" which can be moved downwards. It covers a kind of filter fleece.
+- On the passenger side entry, pull-off the door sealing in the front area.
+- Remove the side wall of the dashboard (just pull).
+- Looking from sidewards, find and remove 3 or 4 black Philips screws which hold the parts of the dashboard together.
+- Unclipse the small dashboard bar, to find and remove 3 more black Philips screws, which connect the "glovebox environment part" to the upper part of the dashboard.
+- Now the "glovebox environment part" is free to be unclipsed and removed.
+- Two nuts (10mm wrench) are holding the VESS.
+- To unlock the connector, press the black "button" heavily.
+Summary: ~11 Screws/nuts in total.
+
 ## CAN communication
 
 The VESS transmits on CAN with 500kBaud.
@@ -73,9 +88,9 @@ byte 6 is speed with sign. Reverse is negative.
 
 * 22 F100 -> "060"
 * 22 F187 -> first frame "963" could be the first part of the part number. Printed label 96390-G2100
-* 22 F18B -> 62 F18B 20 15 10 19
-* 22 F193 -> "100" could be the hardware or software version. On the printed label 1.00 for both.
-* 22 F195 -> "100" could be the hardware or software version. On the printed label 1.00 for both.
+* 22 F18B -> 62 F18B 20 15 10 19 or on an other (SW1.01) unit 20 16 06 08. Maybe the software compile date. It is not the unit production date, because on the print labels they say 17 06 10 for the old and 18 03 20 for the newer unit.
+* 22 F193 -> "100" hardware version. On the printed label 1.00.
+* 22 F195 -> "100" software version. On the printed label 1.00. Using an different VESS with SW 1.01 on the label, the F195 says "101".
 
 * 14 ClearDTCs?
 * 23 ReadMemoryByAddress?
@@ -98,6 +113,43 @@ TDA7396
 * Pin 8: STAND-BY high means fully operational, low means standby
 * Pin 11: MUTE can be pulled to ground via series resistor for muting
 
+## SPI Flash
+
+The YAMAHA sound chip (Ref6) reads the sound samples from the SPI-FLASH.
+
+### Hardware preparations for reading the SPI FLASH
+
+How to read-out the SPI FLASH?
+- To have exclusive access to the SPI, we need to keep the YAMAHA in reset. Pin6 RESET_N = low. E.g. at the resistor R48. But this is actively driven by the controller, pin 17, to high. We do not want to heat the controller by working against it. So we need:
+- Hold the controller in reset, by grounding the reset line of the controller (pin 4), e.g. at R8.
+- Connect the MISO, MOSI, CLK, CS and ground to an raspberry pi's SPI.
+- `flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=2000` identifies the Spansion S25FL116K/S25FL216K" 2048kB.
+- Result: Reading the SPI-FLASH worked (Ref12). The content is different for the "old" SW1.00 and "new" SW1.01 unit.
+
+### Analyzing the SPI content
+
+Looking to the dumps in a hex editor, they seem to contain 16 bit values which continuously change. The low byte is first. For example, the start is
+`00 00 d9 00 77 01 0e 02 ab 02 3f 03 d9 03 71 04`
+which can be seen as 16-bit values 0000 00D9 0177 020E 02AB 033F 03D9 0471. Later, around offset 0x300, the values go negative. So this seems to be a simple signed 16 bit PCM.
+
+Let's try whether Audacity (Ref13) is able to import this. Audacity -> File -> Import -> Raw data. Encoding "Signed 16-bit PCM". Little endian. One channel (mono). 44.1kHz.
+
+Bingo. Audacity shows and plays the sounds. There are five sections:
+* 0 to ~2.5s: "first level engine sound".
+* ~2.5s to ~5.3s: "second level engine sound".
+* ~3.5s to 10.484a: "third level engine sound".
+* 10.484s to 13.735s: The typical Ioniq "space sound".
+* 13.810s to 14.493s: The reverse driving "bing".
+* 14.514s to 14.521s: One sine periode. Could be used for the "driver left vehicle while ready" beep.
+
+Demonstration (MP3 export) [vess_ioniq_sw101_orig.mp3](vess_ioniq_sw101_orig.mp3).
+
+In contrast, the "old" SW1.00 unit has a different layout of the samples. It does not contain the "space sound", but longer "pipe organ like" sounds.
+
+Demonstration (MP3 export) [vess_ioniq_sw100_orig.mp3](vess_ioniq_sw100_orig.mp3).
+
+
+
 ## References
 
 * Ref1 Youtube and github for the Kona VESS https://youtu.be/OLT1aKdpYhs and https://github.com/ereuter/vess
@@ -105,8 +157,11 @@ TDA7396
 * Ref3 schematic of the VESS integration https://service.hyundai-motor.com/UPLOAD/data/Passenger/HY/HME/DEU/ETM-IMAGES/HY-AE22-IMAGES-DEU/eaeevsd17314ag.svg
 * Ref4 internal block diagram of the VESS https://www.goingelectric.de/forum/viewtopic.php?p=540312#p540312
 * Ref5 data sheet of the SPI flash https://www.mouser.com/datasheet/2/380/S25FL116K_00-274912.pdf?srsltid=AfmBOooF0maW2Ar8tsxoBHCp190RUxyHD0BjgixwFOKB7HmAxDmbMZNP
-* Ref6 sound generator YAMAHA https://device.yamaha.com/en/lsi/products/sound_generator/
+* Ref6 sound generator YAMAHA https://device.yamaha.com/en/lsi/products/sound_generator/ and data sheet [YMF827B.pdf](YMF827B.pdf)
 * Ref7 UDS services and response codes https://automotive.wiki/index.php/ISO_14229
 * Ref8 UDS service 19 subfunction list https://piembsystech.com/read-dtc-information-service-0x19-uds-protocol/
 * Ref9 Data sheet of the power amplifier https://www.st.com/resource/en/datasheet/tda7396.pdf
-* Ref10 Data sheet 9S12G family https://www.mouser.de/datasheet/2/302/MC9S12GRMV1-1359997.pdf
+* Ref10 Data sheet 9S12G family https://www.mouser.de/datasheet/2/302/MC9S12GRMV1-1359997.pdf and [MC9S12GRMV1-1359997.pdf](MC9S12GRMV1-1359997.pdf)
+* Ref11 flashrom manual page https://flashrom.org/classic_cli_manpage.html
+* Ref12 dumps of the SPI flash [vess_ioniq_sw100_orig.bin](vess_ioniq_sw100_orig.bin) and [vess_ioniq_sw101_orig.bin](vess_ioniq_sw101_orig.bin) and the command line log [console_log_reading_VESS_SPI_flash.txt](console_log_reading_VESS_SPI_flash.txt)
+* Ref13 Audacity Free Audio Editor https://www.audacityteam.org/
