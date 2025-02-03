@@ -62,16 +62,19 @@ According Ref1, the Kona VESS needs just these messages to provide a sound:
 200 : 00 28 00 10 00 3B D0 00 for gear
 524 : 60 01 02 40 5A 01 C0 02 for speed
 ```
-The Ioniq VESS is still silent, if we sent these messages with 100ms cycle time.
+The Ioniq VESS with software 1.00 is still silent, if we sent these messages with 100ms cycle time. This software version does not even play any sound if installed to the 2018 vehicle.
 
-0x200 byte 1 is gear:
-P 0x80
-D 0xA8
-N 0xB0
-R 0xB8
+The Ioniq VESS with software 1.01 plays perfectly on the desk, just connecting a speaker and SavvyCAN with the script [script_VESS_play.js](script_VESS_play.js).
 
-0x524 byte 2 and 3 are speed. Always positive.
-byte 6 is speed with sign. Reverse is negative.
+Measurements on the original car:
+* 0x200 byte 1 is gear:
+    * P 0x80
+    * D 0xA8
+    * N 0xB0
+    * R 0xB8
+* 0x524
+    * byte 2 and 3 are speed. Always positive.
+    * byte 6 is speed with sign. Reverse is negative.
 
 ### Diagnostic Communication
 
