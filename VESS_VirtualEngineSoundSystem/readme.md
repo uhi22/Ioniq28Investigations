@@ -64,7 +64,7 @@ According Ref1, the Kona VESS needs just these messages to provide a sound:
 ```
 The Ioniq VESS with software 1.00 is still silent, if we sent these messages with 100ms cycle time. This software version does not even play any sound if installed to the 2018 vehicle.
 
-The Ioniq VESS with software 1.01 plays perfectly on the desk, just connecting a speaker and SavvyCAN with the script [script_VESS_play.js](script_VESS_play.js).
+The Ioniq VESS with software 1.01 plays perfectly on the desk, just connecting a speaker and SavvyCAN with the script [script_VESS_play.js](../CAN/script_VESS_play.js).
 
 Measurements on the original car:
 * 0x200 byte 1 is gear:
