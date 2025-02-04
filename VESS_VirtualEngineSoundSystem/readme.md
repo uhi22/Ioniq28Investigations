@@ -123,10 +123,15 @@ The YAMAHA sound chip (Ref6) reads the sound samples from the SPI-FLASH.
 ### Hardware preparations for reading the SPI FLASH
 
 How to read-out the SPI FLASH?
+
+[2025-02-04_VESS_with_raspberry.jpg](2025-02-04_VESS_with_raspberry.jpg)
+[SPI_FLASH_programming_with_Raspberry.jpg](https://github.com/uhi22/foccci/raw/main/doc/SPI_FLASH_programming_with_Raspberry.jpg)
 - To have exclusive access to the SPI, we need to keep the YAMAHA in reset. Pin6 RESET_N = low. E.g. at the resistor R48. But this is actively driven by the controller, pin 17, to high. We do not want to heat the controller by working against it. So we need:
 - Hold the controller in reset, by grounding the reset line of the controller (pin 4), e.g. at R8.
 - Connect the MISO, MOSI, CLK, CS and ground to an raspberry pi's SPI.
-- `flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=2000` identifies the Spansion S25FL116K/S25FL216K" 2048kB.
+- Supply the VESS. Either by applying 12V to the white connector, or by connecting the 3.3V of the Raspberry directly to the 3.3V rail of the VESS.
+- On the Raspberry, run `flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=2000` which identifies the Spansion S25FL116K/S25FL216K" 2048kB.
+- On the Raspberry, run `flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=2000 -r original.bin` to read the content from the SPI FLASH and store it into the file original.bin.
 - Result: Reading the SPI-FLASH worked (Ref12). The content is different for the "old" SW1.00 and "new" SW1.01 unit.
 
 ### Analyzing the SPI content
@@ -153,8 +158,17 @@ Demonstration (MP3 export) [vess_ioniq_sw100_orig.mp3](vess_ioniq_sw100_orig.mp3
 
 ### Is it possible to change the sound?
 
-Yes. Example: In Audacity change the volume and the pitch of the reverse gear bing. Then File -> Export -> other uncompressed files -> Header: raw (headerless), Encoding signed 16-bit PCM, file name `vess_ioniq_sw101_binglower.bin`. This should give an exactly 2MByte file, which could be flashed using
+Yes. You need the following steps:
+0. Remove the VESS from the car and open it.
+1. Connect the VESS to a raspberry and power it up, as described above.
+2. Read the content of the SPI flash and import it into Audacity as described above.
+3. Example: In Audacity change the volume and the pitch of the reverse gear bing. Then File -> Export -> other uncompressed files -> Header: raw (headerless), Encoding signed 16-bit PCM, file name `vess_ioniq_sw101_binglower.bin`. This should give an exactly 2MByte file.
+4. Use this file to flash it on the VESS: 
 `flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=2000 -w vess_ioniq_sw101_binglower.bin`
+5. This should show that the file is successfully flashed.
+6. Disconnect the power and all the lines between Raspberry and VESS.
+7. Plug the VESS back into the car.
+8. Check by driving.
 
 ## References
 
