@@ -159,16 +159,17 @@ Demonstration (MP3 export) [vess_ioniq_sw100_orig.mp3](vess_ioniq_sw100_orig.mp3
 ### Is it possible to change the sound?
 
 Yes. You need the following steps:
-0. Remove the VESS from the car and open it.
-1. Connect the VESS to a raspberry and power it up, as described above.
-2. Read the content of the SPI flash and import it into Audacity as described above.
-3. Example: In Audacity change the volume and the pitch of the reverse gear bing. Then File -> Export -> other uncompressed files -> Header: raw (headerless), Encoding signed 16-bit PCM, file name `vess_ioniq_sw101_binglower.bin`. This should give an exactly 2MByte file.
-4. Use this file to flash it on the VESS: 
+
+1. Remove the VESS from the car and open it.
+2. Connect the VESS to a raspberry and power it up, as described above.
+3. Read the content of the SPI flash and import it into Audacity as described above.
+4. Example: In Audacity change the volume and the pitch of the reverse gear bing. Then File -> Export -> other uncompressed files -> Header: raw (headerless), Encoding signed 16-bit PCM, file name `vess_ioniq_sw101_binglower.bin`. This should give an exactly 2MByte file.
+5. Use this file to flash it on the VESS: 
 `flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=2000 -w vess_ioniq_sw101_binglower.bin`
-5. This should show that the file is successfully flashed.
-6. Disconnect the power and all the lines between Raspberry and VESS.
-7. Plug the VESS back into the car.
-8. Check by driving.
+6. This should show that the file is successfully flashed.
+7. Disconnect the power and all the lines between Raspberry and VESS.
+8. Plug the VESS back into the car.
+9. Check the sound by driving.
 
 ## References
 
