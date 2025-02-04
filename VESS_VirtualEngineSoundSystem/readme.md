@@ -124,8 +124,8 @@ The YAMAHA sound chip (Ref6) reads the sound samples from the SPI-FLASH.
 
 How to read-out the SPI FLASH?
 
-[2025-02-04_VESS_with_raspberry.jpg](2025-02-04_VESS_with_raspberry.jpg)
-[SPI_FLASH_programming_with_Raspberry.jpg](https://github.com/uhi22/foccci/raw/main/doc/SPI_FLASH_programming_with_Raspberry.jpg)
+![image](2025-02-04_VESS_with_raspberry.jpg)
+![image](https://github.com/uhi22/foccci/raw/main/doc/SPI_FLASH_programming_with_Raspberry.jpg)
 - To have exclusive access to the SPI, we need to keep the YAMAHA in reset. Pin6 RESET_N = low. E.g. at the resistor R48. But this is actively driven by the controller, pin 17, to high. We do not want to heat the controller by working against it. So we need:
 - Hold the controller in reset, by grounding the reset line of the controller (pin 4), e.g. at R8.
 - Connect the MISO, MOSI, CLK, CS and ground to an raspberry pi's SPI.
