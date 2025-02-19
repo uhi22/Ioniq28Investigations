@@ -123,6 +123,322 @@ Freescale / NXP 9S12G192VLH, 64pin. See Ref10.
     * better: UsbdmMemoryDump.exe. Select HCS12. Enter memory range (see below) and width (1), press ReadMemory and SafeToFile.
     * memory range:  EEPROM is at 400 to 13FF. Program flash is from 10000 to 3FFFF (according to Ref10).
     * result: vess_maincontroller_v1.0_eeprom_and_flash.s19
+    * maybe this is broken, due to not reflecting the paged memory structure
+    * Explanation of the paging: https://community.nxp.com/t5/OSBDM-and-TBDML/USBDM-and-HCS12-9S12D64-read-write-problems/td-p/501003
+
+    * memory range:  EEPROM is at 400 to 13FF. Program flash is from 10000 to 3FFFF (according to Ref10).
+    * width 2
+    * x Global (linear) addressing
+    * also this gives wrong results, e.g. a mass erased flash is partly reported as not erased.
+```
+```
+
+    * next try: use the paged access. "x Page Flash", PPAGE reg address = 15 (means 15hex).
+    * 4000 to 7FFF (fix page)
+    * C000 to FFFF (fix page)
+    * 018000 to 01BFFF (page 01 in 16k window at 8000)
+    * 028000 to 02BFFF (page 02 in 16k window at 8000)
+    * and so on, until page 0F (according to Ref10, Figure 5-11, Local to Global Address Mapping)
+    
+Using a mass-erased unit, this shows in the log window:
+```
+Creating Empty flash image...
+Interface options: HCS12, , speed = 250
+Using paged flash addresses (PPAGE address=0x15)
+Using Memory space = 
+Reading memory-block[0x000400, 0x0013FF, 2]...Blank
+Using Memory space = 
+Reading memory-block[0x004000, 0x004FFF, 2]...Blank
+Reading memory-block[0x005000, 0x005FFF, 2]...Blank
+Reading memory-block[0x006000, 0x006FFF, 2]...Blank
+Reading memory-block[0x007000, 0x007FFF, 2]...Blank
+Using Memory space = 
+Reading memory-block[0x00C000, 0x00CFFF, 2]...Blank
+Reading memory-block[0x00D000, 0x00DFFF, 2]...Blank
+Reading memory-block[0x00E000, 0x00EFFF, 2]...Blank
+Reading memory-block[0x00F000, 0x00FFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x01
+Reading memory-block[0x01:8000, 0x01:8FFF, 2]...Blank
+Reading memory-block[0x01:9000, 0x01:9FFF, 2]...Blank
+Reading memory-block[0x01:A000, 0x01:AFFF, 2]...Blank
+Reading memory-block[0x01:B000, 0x01:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x02
+Reading memory-block[0x02:8000, 0x02:8FFF, 2]...Blank
+Reading memory-block[0x02:9000, 0x02:9FFF, 2]...Blank
+Reading memory-block[0x02:A000, 0x02:AFFF, 2]...Blank
+Reading memory-block[0x02:B000, 0x02:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x03
+Reading memory-block[0x03:8000, 0x03:8FFF, 2]...Blank
+Reading memory-block[0x03:9000, 0x03:9FFF, 2]...Blank
+Reading memory-block[0x03:A000, 0x03:AFFF, 2]...Blank
+Reading memory-block[0x03:B000, 0x03:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x04
+Reading memory-block[0x04:8000, 0x04:8FFF, 2]...Blank
+Reading memory-block[0x04:9000, 0x04:9FFF, 2]...Blank
+Reading memory-block[0x04:A000, 0x04:AFFF, 2]...Blank
+Reading memory-block[0x04:B000, 0x04:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x05
+Reading memory-block[0x05:8000, 0x05:8FFF, 2]...Blank
+Reading memory-block[0x05:9000, 0x05:9FFF, 2]...Blank
+Reading memory-block[0x05:A000, 0x05:AFFF, 2]...Blank
+Reading memory-block[0x05:B000, 0x05:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x06
+Reading memory-block[0x06:8000, 0x06:8FFF, 2]...Blank
+Reading memory-block[0x06:9000, 0x06:9FFF, 2]...Blank
+Reading memory-block[0x06:A000, 0x06:AFFF, 2]...Blank
+Reading memory-block[0x06:B000, 0x06:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x07
+Reading memory-block[0x07:8000, 0x07:8FFF, 2]...Blank
+Reading memory-block[0x07:9000, 0x07:9FFF, 2]...Blank
+Reading memory-block[0x07:A000, 0x07:AFFF, 2]...Blank
+Reading memory-block[0x07:B000, 0x07:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x08
+Reading memory-block[0x08:8000, 0x08:8FFF, 2]...Blank
+Reading memory-block[0x08:9000, 0x08:9FFF, 2]...Blank
+Reading memory-block[0x08:A000, 0x08:AFFF, 2]...Blank
+Reading memory-block[0x08:B000, 0x08:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x09
+Reading memory-block[0x09:8000, 0x09:8FFF, 2]...Blank
+Reading memory-block[0x09:9000, 0x09:9FFF, 2]...Blank
+Reading memory-block[0x09:A000, 0x09:AFFF, 2]...Blank
+Reading memory-block[0x09:B000, 0x09:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0A
+Reading memory-block[0x0A:8000, 0x0A:8FFF, 2]...Blank
+Reading memory-block[0x0A:9000, 0x0A:9FFF, 2]...Blank
+Reading memory-block[0x0A:A000, 0x0A:AFFF, 2]...Blank
+Reading memory-block[0x0A:B000, 0x0A:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0B
+Reading memory-block[0x0B:8000, 0x0B:8FFF, 2]...Blank
+Reading memory-block[0x0B:9000, 0x0B:9FFF, 2]...Blank
+Reading memory-block[0x0B:A000, 0x0B:AFFF, 2]...Blank
+Reading memory-block[0x0B:B000, 0x0B:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0C
+Reading memory-block[0x0C:8000, 0x0C:8FFF, 2]...Blank
+Reading memory-block[0x0C:9000, 0x0C:9FFF, 2]...Blank
+Reading memory-block[0x0C:A000, 0x0C:AFFF, 2]...Blank
+Reading memory-block[0x0C:B000, 0x0C:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0D
+Reading memory-block[0x0D:8000, 0x0D:8FFF, 2]...Blank
+Reading memory-block[0x0D:9000, 0x0D:9FFF, 2]...Blank
+Reading memory-block[0x0D:A000, 0x0D:AFFF, 2]...Blank
+Reading memory-block[0x0D:B000, 0x0D:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0E
+Reading memory-block[0x0E:8000, 0x0E:8FFF, 2]...Blank
+Reading memory-block[0x0E:9000, 0x0E:9FFF, 2]...Blank
+Reading memory-block[0x0E:A000, 0x0E:AFFF, 2]...Blank
+Reading memory-block[0x0E:B000, 0x0E:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0F
+Reading memory-block[0x0F:8000, 0x0F:8FFF, 2]...Blank
+Reading memory-block[0x0F:9000, 0x0F:9FFF, 2]...Blank
+Reading memory-block[0x0F:A000, 0x0F:AFFF, 2]...Blank
+Reading memory-block[0x0F:B000, 0x0F:BFFF, 2]...Blank
+Done
+```
+
+Using the original SW 1.1 unit, we get
+
+```
+Creating Empty flash image...
+Interface options: HCS12, , speed = 250
+Using paged flash addresses (PPAGE address=0x15)
+Using Memory space = 
+Reading memory-block[0x000400, 0x0013FF, 2]...
+Using Memory space = 
+Reading memory-block[0x004000, 0x004FFF, 2]...
+Reading memory-block[0x005000, 0x005FFF, 2]...Blank
+Reading memory-block[0x006000, 0x006FFF, 2]...Blank
+Reading memory-block[0x007000, 0x007FFF, 2]...
+Using Memory space = 
+Reading memory-block[0x00C000, 0x00CFFF, 2]...
+Reading memory-block[0x00D000, 0x00DFFF, 2]...
+Reading memory-block[0x00E000, 0x00EFFF, 2]...
+Reading memory-block[0x00F000, 0x00FFFF, 2]...
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x01
+Reading memory-block[0x01:8000, 0x01:8FFF, 2]...Blank
+Reading memory-block[0x01:9000, 0x01:9FFF, 2]...Blank
+Reading memory-block[0x01:A000, 0x01:AFFF, 2]...Blank
+Reading memory-block[0x01:B000, 0x01:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x02
+Reading memory-block[0x02:8000, 0x02:8FFF, 2]...Blank
+Reading memory-block[0x02:9000, 0x02:9FFF, 2]...Blank
+Reading memory-block[0x02:A000, 0x02:AFFF, 2]...Blank
+Reading memory-block[0x02:B000, 0x02:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x03
+Reading memory-block[0x03:8000, 0x03:8FFF, 2]...Blank
+Reading memory-block[0x03:9000, 0x03:9FFF, 2]...Blank
+Reading memory-block[0x03:A000, 0x03:AFFF, 2]...Blank
+Reading memory-block[0x03:B000, 0x03:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x04
+Reading memory-block[0x04:8000, 0x04:8FFF, 2]...
+Reading memory-block[0x04:9000, 0x04:9FFF, 2]...
+Reading memory-block[0x04:A000, 0x04:AFFF, 2]...
+Reading memory-block[0x04:B000, 0x04:BFFF, 2]...
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x05
+Reading memory-block[0x05:8000, 0x05:8FFF, 2]...
+Reading memory-block[0x05:9000, 0x05:9FFF, 2]...
+Reading memory-block[0x05:A000, 0x05:AFFF, 2]...Blank
+Reading memory-block[0x05:B000, 0x05:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x06
+Reading memory-block[0x06:8000, 0x06:8FFF, 2]...Blank
+Reading memory-block[0x06:9000, 0x06:9FFF, 2]...Blank
+Reading memory-block[0x06:A000, 0x06:AFFF, 2]...Blank
+Reading memory-block[0x06:B000, 0x06:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x07
+Reading memory-block[0x07:8000, 0x07:8FFF, 2]...Blank
+Reading memory-block[0x07:9000, 0x07:9FFF, 2]...Blank
+Reading memory-block[0x07:A000, 0x07:AFFF, 2]...Blank
+Reading memory-block[0x07:B000, 0x07:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x08
+Reading memory-block[0x08:8000, 0x08:8FFF, 2]...Blank
+Reading memory-block[0x08:9000, 0x08:9FFF, 2]...Blank
+Reading memory-block[0x08:A000, 0x08:AFFF, 2]...Blank
+Reading memory-block[0x08:B000, 0x08:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x09
+Reading memory-block[0x09:8000, 0x09:8FFF, 2]...Blank
+Reading memory-block[0x09:9000, 0x09:9FFF, 2]...Blank
+Reading memory-block[0x09:A000, 0x09:AFFF, 2]...Blank
+Reading memory-block[0x09:B000, 0x09:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0A
+Reading memory-block[0x0A:8000, 0x0A:8FFF, 2]...Blank
+Reading memory-block[0x0A:9000, 0x0A:9FFF, 2]...Blank
+Reading memory-block[0x0A:A000, 0x0A:AFFF, 2]...Blank
+Reading memory-block[0x0A:B000, 0x0A:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0B
+Reading memory-block[0x0B:8000, 0x0B:8FFF, 2]...Blank
+Reading memory-block[0x0B:9000, 0x0B:9FFF, 2]...Blank
+Reading memory-block[0x0B:A000, 0x0B:AFFF, 2]...Blank
+Reading memory-block[0x0B:B000, 0x0B:BFFF, 2]...Blank
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0C
+Reading memory-block[0x0C:8000, 0x0C:8FFF, 2]...Blank
+Reading memory-block[0x0C:9000, 0x0C:9FFF, 2]...Blank
+Reading memory-block[0x0C:A000, 0x0C:AFFF, 2]...Blank
+Reading memory-block[0x0C:B000, 0x0C:BFFF, 2]...
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0D
+Reading memory-block[0x0D:8000, 0x0D:8FFF, 2]...
+Reading memory-block[0x0D:9000, 0x0D:9FFF, 2]...Blank
+Reading memory-block[0x0D:A000, 0x0D:AFFF, 2]...Blank
+Reading memory-block[0x0D:B000, 0x0D:BFFF, 2]...
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0E
+Reading memory-block[0x0E:8000, 0x0E:8FFF, 2]...
+Reading memory-block[0x0E:9000, 0x0E:9FFF, 2]...
+Reading memory-block[0x0E:A000, 0x0E:AFFF, 2]...
+Reading memory-block[0x0E:B000, 0x0E:BFFF, 2]...
+Using Memory space = 
+Writing PPAGE(0x0015) = 0x0F
+Reading memory-block[0x0F:8000, 0x0F:8FFF, 2]...
+Reading memory-block[0x0F:9000, 0x0F:9FFF, 2]...
+Reading memory-block[0x0F:A000, 0x0F:AFFF, 2]...
+Reading memory-block[0x0F:B000, 0x0F:BFFF, 2]...
+Done
+```
+
+The pages 0x0D and 0x0F are also visible in the fix areas at 0x4000 and 0xC000, so using the above configuration, we have them
+twice in the s19 file. Could be optimized.
+
+Manually cutted s19 file which contains only the relevant parts and no duplicates: vess_v1.1_eeprom_and_flash_pagedRead_only_relevantparts.s19
+
+#### Content of the microcontrollers flash
+
+At 0xC000 there seems to be a boot loader, which is controlled via a serial terminal. We find a lot of strings there. This maybe offers the possibility to update the software and the sounds just using a serial interface.
+
+```
+==================== VESS BIOS ===================
+=  PROG Name	: %s 	
+VESS_BOOTLOADER
+=  PROG Ver	: %s 	
+REV 1.00.09
+=  Start Date	: %s 	
+2013/10/23
+=  UpGrade Date	: %s 	
+2015/09/20
+=------------------------------------------------= 
+==================== HELP MENU =================== 
+=  HM  : HELP MENU                               = 
+=  PI  : PROGRAM INFORMATION                     = 
+=------------------------------------------------= 
+=  EB  : EEPROM ERASE ALL BLOCK                  = 
+=  EC  : EEPROM SAVE DATA CHECK                  = 
+=------------------------------------------------= 
+=  SC  : S_FLASH CAPACITY CHECK                  = 
+=  PR  : S_FLASH PAGE READ                       = 
+=------------------------------------------------= 
+=  SE  : S_FLASH ERASE                           = 
+=  SD  : S_FLASH SOUND DOWNLOAD                  = 
+=------------------------------------------------= 
+=  AE  : P_FLASH APPLICATION ERASE               = 
+=  AR  : P_FLASH APPLICATION REPROGRAM           = 
+=------------------------------------------------= 
+=  QM  : QUIT BOOTLOADER(RUN APPLICATION)        = 
+================== TYPE HM HELP ================== 
+[BOOTLOADER]	[CMD] VESS BOOT : 
+[BOOTLOADER]	[ERROR] BOOT COMMAND ERROR!!
+================= APPLICATION  INFO ==============
+=  APP Target	: APPLICATION ERROR!!!
+=  APP Target	: %s
+=  APP Ver	: APPLICATION ERROR!!!
+=  APP Ver	: REV %c.%c%c.%c%c 
+=------------------------------------------------= 
+[BOOTLOADER]	[SD] SFlash ÃÊ±âÈ­(SE)¸¦ ¸ÕÀú ½ÇÇà ÇÏ½Ê½Ã¿ä...!!
+[BOOTLOADER]	[SD] XMODEM ¹æ½ÄÀ¸·Î À½¿ø Data¸¦ Download ¹Þ½À´Ï´Ù...
+[BOOTLOADER]	[SD] XMODEM À» ½ÇÇà ½ÃÄÑ ÁÖ½Ê½Ã¿À...
+[BOOTLOADER]	[AR] IFLASH APPLICATION ERASE(AE)¸¦ ¸ÕÀú ½ÇÇà ÇÏ½Ê½Ã¿ä...!!
+[BOOTLOADER]	[AR] XMODEM ¹æ½ÄÀ¸·Î APPLICATION Data¸¦ Download ¹Þ½À´Ï´Ù...
+[BOOTLOADER]	[AR] XMODEM À» ½ÇÇà ½ÃÄÑ ÁÖ½Ê½Ã¿À...
+[BOOTLOADER]	[AR] Application Reprogramming SUCCESS..!!! 
+[BOOTLOADER]	[AR] Application Reprogramming FAIL...!!! 
+[BOOTLOADER]	[QM] RUN AP
+```
+
+
+### How to write a different software version into the controller?
+
+To update a VESS with from the old software 1.0 to the new 1.1, we can use the following procedure:
+
+* Connect USBDM via USB to the windows PC.
+* Connect USBDM to the VESS via the 6-pin header.
+* Connect 12V to the VESS.
+* Disable the watchdog, by pulling TP83 to ground via 10k. Disabling the watchdog is necessary, because otherwise it will reset the controller during programming, which leads corrupted memory. The disabling of the watchdog must be done AFTER the VESS is powered, because otherwise the SBC will enter a kind of emergency mode and hold the reset line low all the time.
+* Windows start menu -> HCS12 Programmer (which is a link to "C:\Program Files\pgo\USBDM 4.12.1.330\". Same as "UsbdmFlashProgrammer.exe -target=HCS12"
+* "Load Hex File" vess_v1.1_eeprom_and_flash_pagedRead_only_relevantparts.s19
+* Select controller MC9S12G192. Using "Detect chip" the list is filtered by chip ID, which should also include the G192.
+* Set security to "unsecure"
+* Push "Mass Erase Now" to erase.
+* Set erase mode to "EraseAll", to erase everything before programming the new image. (maybe this is redundant)
+* Push "Program Flash", this should run without error.
+* Push "Verify Flash", this should show no deviations.
+* Remove the ground connection of TP83. This lets the watchdog run and produce a single reset pulse.
+* The controller starts up, and turns the VESS light on.
+
+
 
 ## Power Amplifier
 
