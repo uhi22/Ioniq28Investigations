@@ -50,6 +50,7 @@ SPI Flash SPANSION FL116 KVF01 (or KVE01?) S25FL116K 16 MBit see Ref5
 - Now the "glovebox environment part" is free to be unclipsed and removed.
 - Two nuts (10mm wrench) are holding the VESS.
 - To unlock the connector, press the black "button" heavily.
+
 Summary: ~11 Screws/nuts in total.
 
 ## CAN communication
@@ -107,7 +108,21 @@ Freescale / NXP 9S12G192VLH, 64pin. See Ref10.
 
 * Interface between BDM and USB: USBDM Programmer JS16 JM16 BDM/OSBDM OSBDM Download Debugger Emulator Downloader 48MHz USB 2.0 (JS16)
 * Software: https://sourceforge.net/projects/usbdm/files/Version%204.12.1/Software/
-
+    * Download and check the readme: ReadMe Software.md
+    * Download the USB driver. Which version? Trying USBDM_Drivers_4_12_3_Win_x64.msi which is listet for Win7, under Win10.
+    * Install the USB driver.
+    * Downloading USBDM_4_12_1_330_Win.msi. Windows complains that this is not secure.
+    * Install USBDM_4_12_1_330_Win.msi
+    * USBDM hardware manual https://usbdm.sourceforge.io/USBDM_V4.12/html/index.html
+    * USBDM flash programmer software manual https://usbdm.sourceforge.io/USBDM_V4.12/USBDM_FlashProgrammers/html/index.html
+    * Hardware setup:
+        * Open the USBDM and set the jumper to 3.3V. Make sure that the BDM connector has 3.3V, not 5V, before connecting to the target.
+        * Solder a 6-pin-header to the VESS. Connect the USBDM to the VESS.
+        * Connect 12V to the VESS, otherwise the SBC holds the controller in reset and the USBDM cannot establish a connection.    
+    * wrong: Navigate to C:\Program Files\pgo\USBDM 4.12.1.330 and start UsbdmFlashProgrammer.exe
+    * better: UsbdmMemoryDump.exe. Select HCS12. Enter memory range (see below) and width (1), press ReadMemory and SafeToFile.
+    * memory range:  EEPROM is at 400 to 13FF. Program flash is from 10000 to 3FFFF (according to Ref10).
+    * result: vess_maincontroller_v1.0_eeprom_and_flash.s19
 
 ## Power Amplifier
 
