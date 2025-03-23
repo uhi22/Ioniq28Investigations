@@ -69,6 +69,9 @@ When measuring on the harness, surprisingly the two feedback coils have differen
 * 1D 2D 81.5 ohms
 It is not clear whether this is intended or a sign of bad contacts.
 
+The wiring diagram and manual how to change it is linked here: https://www.ioniqforum.com/threads/mcu-p0a41-drive-motor-a-position-sensor-circuit-low-and-high.49360/
+PDF: resolver_wiring_and_replace.pdf
+
 ### Power Supply
 
 The 12V power comes via the harness connector Q3, P4, Q4.
