@@ -18,7 +18,7 @@ The main controller board and parts of the inverter gate driver board:
 
 - 1A sine wave 10kHz, between 2V and 12V. The resolver exitation. On motor side ~25.7ohms. ![image](20250323_resolver_exciter_1B_1A.jpg)
 - 1B sine wave inverse to A1.
-- 1C together with 2C: Resolver On motor side ~73ohms. ![image](20250323_resolver_2D_1D.jpg)
+- 1C together with 2C: Resolver On motor side ~73ohms. ![image](20250323_resolver_2C_1C.jpg)
 - 1D together with 2D: Resolver. On motor side ~81ohms. ![image](20250323_resolver_2D_1D.jpg)
 - 1J+1K PCAN?, connected to two transceivers U9002 and U9003.
 - 1L+1M diag CAN?, connected to two transceivers U9001 and U9000.
