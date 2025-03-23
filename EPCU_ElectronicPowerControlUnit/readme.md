@@ -18,8 +18,8 @@ The main controller board and parts of the inverter gate driver board:
 
 - 1A sine wave 10kHz, between 2V and 12V. The resolver exitation. On motor side ~25.7ohms. ![image](20250323_resolver_exciter_1B_1A.jpg)
 - 1B sine wave inverse to A1.
-- 1C together with 2C: Resolver On motor side ~73ohms. ![image](2025-03-23_resolver_2D_1D.jpg)
-- 1D together with 2D: Resolver. On motor side ~81ohms. ![image](2025-03-20250323_resolver_2D_1D.jpg)
+- 1C together with 2C: Resolver On motor side ~73ohms. ![image](20250323_resolver_2D_1D.jpg)
+- 1D together with 2D: Resolver. On motor side ~81ohms. ![image](20250323_resolver_2D_1D.jpg)
 - 1J+1K PCAN?, connected to two transceivers U9002 and U9003.
 - 1L+1M diag CAN?, connected to two transceivers U9001 and U9000.
 - 1O Data line U9500 "ST L9637" ISO9141 "K-Line" transceiver. https://www.st.com/en/automotive-analog-and-power/l9637.html
@@ -59,6 +59,15 @@ CAN   U1[V]  U2[V]
 200   3.30   1.50
 254   3.97   2.00
 ```
+
+#### Motor Angle Position Sensor
+
+Uses a resolver with one exitation coil and two feedback coils.
+![image](20250323_motor_position_sensor_connector.jpg)
+When measuring on the harness, surprisingly the two feedback coils have different resistance:
+* 1C 2C 73.5 ohms
+* 1D 2D 81.5 ohms
+It is not clear whether this is intended or a sign of bad contacts.
 
 ### Power Supply
 
