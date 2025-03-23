@@ -16,28 +16,32 @@ The main controller board and parts of the inverter gate driver board:
 
 - 4x16 pin connector CN1000 to the cable harness. The numbering is printed inside the connector. Letters A to Q (with I missing) and rows 1 to 4.
 
-- A1 sine wave 10kHz, between 2V and 12V. The resolver exitation.
-- B1 sine wave inverse to A1.
-- J1+K1 PCAN?, connected to two transceivers U9002 and U9003.
-- L1+M1 diag CAN?, connected to two transceivers U9001 and U9000.
-- O1 Data line U9500 "ST L9637" ISO9141 "K-Line" transceiver. https://www.st.com/en/automotive-analog-and-power/l9637.html
-- Q1 GND
+- 1A sine wave 10kHz, between 2V and 12V. The resolver exitation. On motor side ~25.7ohms. ![image](20250323_resolver_exciter_1B_1A.jpg)
+- 1B sine wave inverse to A1.
+- 1C together with 2C: Resolver On motor side ~73ohms. ![image](2025-03-23_resolver_2D_1D.jpg)
+- 1D together with 2D: Resolver. On motor side ~81ohms. ![image](2025-03-20250323_resolver_2D_1D.jpg)
+- 1J+1K PCAN?, connected to two transceivers U9002 and U9003.
+- 1L+1M diag CAN?, connected to two transceivers U9001 and U9000.
+- 1O Data line U9500 "ST L9637" ISO9141 "K-Line" transceiver. https://www.st.com/en/automotive-analog-and-power/l9637.html
+- 1Q GND
 
-- M2+N2 spare CAN, not populated L9003, U9005.
-- P2, Q2 GND
+- 2C Resolver, see above
+- 2D Resolver, see above
+- 2M+2N spare CAN, not populated L9003, U9005.
+- 2P, 2Q GND
 
-- C3 accelerator pedal redundant 0.5V to 2V
-- D3 5V accelerator pedal supply 5V
-- E3 5V accelerator pedal supply 5V
-- F3 accelerator pedal main 1V to 4V
+- 3C accelerator pedal redundant 0.5V to 2V
+- 3D 5V accelerator pedal supply 5V
+- 3E 5V accelerator pedal supply 5V
+- 3F accelerator pedal main 1V to 4V
 
-- P3 wakeup line. 12V to enable the power supply of the board.
-- Q3 12V
+- 3P wakeup line. 12V to enable the power supply of the board.
+- 3Q 12V
 
-- D4 GND accelerator pedal
-- E4 GND accelerator pedal
-- F4, G4 bus choke L2601
-- P4, Q4 12V
+- 4D GND accelerator pedal
+- 4E GND accelerator pedal
+- 4F, G4 bus choke L2601
+- 4P, Q4 12V
 
 #### Accelerometer pedal
 
