@@ -67,7 +67,7 @@ Uses a resolver with one exitation coil and two feedback coils.
 When measuring on the harness, surprisingly the two feedback coils have different resistance:
 * 1C 2C 73.5 ohms
 * 1D 2D 81.5 ohms
-It is not clear whether this is intended or a sign of bad contacts.
+According to resolver_wiring_and_replace.pdf, this is normal.
 
 The wiring diagram and manual how to change it is linked here: https://www.ioniqforum.com/threads/mcu-p0a41-drive-motor-a-position-sensor-circuit-low-and-high.49360/
 PDF: resolver_wiring_and_replace.pdf
