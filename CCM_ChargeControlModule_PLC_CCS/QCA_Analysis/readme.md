@@ -80,9 +80,49 @@ The .nvm is a binary file, which looks quite similar than the QCA content. Some 
 Long tables.
 Real code starts around 0x85A0 and goes until 0x6'2500. No fill pattern afterwards.
 
+The "startpattern" which the .nvm has at 0x85A0, is in the QCA at 0x1'8ce0 and 0x14'8ce0. 15 bytes are identical: 00 67 80 2d d4 0b dc 7c d8 ce 8d 21 34 35 b3.
+
+At "startpattern-8", at 0x8598 we find the size of the compressed data (0x00059f62).
+Same situation in the QCA:
+<size> + <startaddress> = <endaddress>
+4'b068+14'8ce0=19'3d48
+We find the size before the startpattern, at 14'8cd8.
+The calculated end address matches the address, where the border between filled data and 0xff fillpattern is.
+
+At startpattern-4 there is an other size information.
+It may be the uncompressed size.
+- QCA7000: 0x077134=487732 uncompr, 0x04b068=307304 compressed. Ratio 63.0%.
+- AR7420: 0x08FC40=588864 uncompr, 0x59f62=368482 compressed. Ratio 62.6%.
+
+At startpattern - 0x78 there is an other size information, which is 0x10 more than the compressedSize.
+
+At startpattern - 0x94 seems to be a CRC32.
+
+- 0xE0 there is an other size information, which is 0x92 or 0x90 more than the compressedSize.
+
+Assumption: A "block" starts with the blockStartToken 01 00 01 00 03.
+The byte afterwards specifies the type of block.
+- 0x00: table
+- 0x40: table
+- 0x80: compressed application.
+
+The AR7420 contains 7 blockStartTokens.
+The QCA7000 contains 15 blockStartTokens.
+
+blockStartToken + 0x0C: 0x00208400
+blockStartToken + 0x18: 0x00208744
+These are the same for AR7420 and QCA7000.
+
+Extracted compressed part incl blockStartToken and header informations, for further investigations: CCM_FlashDump_SpiFlash_Ioniq_compressed_part.bin
+
+
 ## Conclusion 1: The firmware images (also on the SPI flash) are "packed".
 
 They do not contain ARM instruction. Seems that the bootloader "unpacks" them into the RAM to get the real executable code.
+
+We have a compression ratio of ~63%. Which compression algorithms are likely?
+
+Google "compression algorithms microcontrollers" says LZ4, SMASH, LZ77. Further candidates: LZSS, LZW, LZ0, Snappy, deflate, ...
 
 # Approach 2: Use the JTAG
 
