@@ -124,6 +124,23 @@ We have a compression ratio of ~63%. Which compression algorithms are likely?
 
 Google "compression algorithms microcontrollers" says LZ4, SMASH, LZ77. Further candidates: LZSS, LZW, LZ0, Snappy, deflate, ...
 
+### Trial 1: ZLIB
+
+References:
+* https://de.wikipedia.org/wiki/Datenkompression : "1995 zlib, freie Standardbibliothek für Deflate"
+* https://de.wikipedia.org/wiki/Zlib
+* https://zlib.net/
+* https://docs.python.org/3/library/zlib.html
+* https://stackabuse.com/python-zlib-library-tutorial/
+
+Results:
+
+```
+decompressed_data = zlib.decompress(myStream, wbits = -8)
+zlib.error: Error -3 while decompressing data: invalid stored block lengths
+```
+Same result with all wbit = -8 to -15.
+
 # Approach 2: Use the JTAG
 
 
