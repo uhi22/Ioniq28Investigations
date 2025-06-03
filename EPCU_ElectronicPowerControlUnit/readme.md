@@ -34,6 +34,8 @@ The main controller board and parts of the inverter gate driver board:
 - 3D 5V accelerator pedal supply 5V
 - 3E 5V accelerator pedal supply 5V
 - 3F accelerator pedal main 1V to 4V
+- 3H shift paddle 1
+- 3J shift paddle 2
 
 - 3P wakeup line. 12V to enable the power supply of the board.
 - 3Q 12V
@@ -59,6 +61,10 @@ CAN   U1[V]  U2[V]
 200   3.30   1.50
 254   3.97   2.00
 ```
+
+#### Shift Paddles
+
+Pins 3H and 3J are at ~4.75V if nothing is connected. When adding a pull-down of 1k, they fall to 0.82V. They may connect to switches to ground in the steering wheel paddles. Connecting them to ground does not change anything obviously on CAN. Most likely they have resistors for plausibilization.
 
 #### Motor Angle Position Sensor
 
