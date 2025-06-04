@@ -64,7 +64,12 @@ CAN   U1[V]  U2[V]
 
 #### Shift Paddles
 
-Pins 3H and 3J are at ~4.75V if nothing is connected. When adding a pull-down of 1k, they fall to 0.82V. They may connect to switches to ground in the steering wheel paddles. Connecting them to ground does not change anything obviously on CAN. Most likely they have resistors for plausibilization.
+Pins 3H and 3J are at ~4.75V if nothing is connected. When adding a pull-down of 1k, they fall to 0.82V. They connect to switches on the steering wheel paddles.
+
+3H is connected to the right paddle, "decrease recuperation". The switch is connected to vehicle ground. Unpressed infinite resistance. Pressed 202 ohm.
+
+3J is connected to the left paddle, "increase recuperation". The switch is connected to vehicle ground. Unpressed infinite resistance. Pressed 202 ohm.
+
 
 #### Motor Angle Position Sensor
 
