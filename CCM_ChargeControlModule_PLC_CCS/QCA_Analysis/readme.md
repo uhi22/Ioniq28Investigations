@@ -141,6 +141,14 @@ zlib.error: Error -3 while decompressing data: invalid stored block lengths
 ```
 Same result with all wbit = -8 to -15.
 
+### Not-compressed parts of the Ioniq binary
+
+We find 426 occurences of the typical return from subroutine (with included switch of the instruction set from ARM to THUMB) `1EFF2FE1        bx      lr`.
+
+At 0x440 there is ARM code.
+
+
+
 # Approach 2: Use the JTAG
 
 
