@@ -1,6 +1,9 @@
 
 # Hyundai Ioniq (2018) investigations
 
+# BMS Battery Management System
+
+see [BMS_BatteryManagementSystem/readme.md](BMS_BatteryManagementSystem/readme.md)
 
 # CCM Charge Control Module
 
