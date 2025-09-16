@@ -873,4 +873,28 @@ Conclusions:
 docu: https://gitlab.zapb.de/openocd/python-openocd
 installation from cmd: pip install openocd
 
+# QCA firmware hacking DEF CON 33
+
+- authors: jan.berens@alpitronic.it, marcell.szakaly@cs.ox.ac.uk
+- reference: https://arxiv.org/abs/2404.06635
+
+https://openinverter.org/forum/viewtopic.php?p=86171#p86171
+https://youtu.be/SQz4nySj4hg
+
+- at 32:24 e.g. NVM Manifest, NVM Softloader, Memory Control, different types of firmware packages.
+- Assumed boot sequence
+- use SPI read (-address) to dump the bootloader image
+- reverse the bootloader
+- LZMA is the compression method of the firmware
+- They created custom firmware to run DOOM (receiving keyboard via UDP and sending video frame via UDP).
+
+
+## PIB layout
+
+Undocumented security bit at offset 0x1F8C: 0 = remote reading and writing allowed, 1 = remote reading and writing blocked.
+The offset of the raw pib is different (as shown at 20:44 in the video)
+
+xxd edited.pib | grep 00002340
+
+In the video they mark the byte at 0x234C.
 
