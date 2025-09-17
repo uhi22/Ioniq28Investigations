@@ -1005,6 +1005,14 @@ pi@RPi2023:~/myprogs/open-plc-utils $ ls -al parameterdump.pib
 -rw-r--r-- 1 pi pi 9040 17. Sep 15:34 parameterdump.pib
 ```
 
+Step 9b: check whether the "remote protection flag" at 0x234c is set. No, it is zero.
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ xxd parameterdump.pib | grep 00002340
+00002340: 0100 0000 0000 0000 0000 0000 0000 0000  ................
+```
+
+
 Step 10: write the PIB. This works.
 
 ```
