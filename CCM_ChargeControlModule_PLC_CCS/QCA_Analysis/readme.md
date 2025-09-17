@@ -898,3 +898,283 @@ xxd edited.pib | grep 00002340
 
 In the video they mark the byte at 0x234C.
 
+# Security analysis
+
+## Is it possible to read and write PIB remotely?
+
+Precondition: QCA7005 (on Foccci) as EV, and AR4720 with pyPLC as EVSE.
+
+Step 1: Read the software versions of all modems in the network
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 -r broadcast
+eth0 FF:FF:FF:FF:FF:FF Request Version Information
+eth0 98:48:27:5A:3C:E4 QCA7420 MAC-QCA7420-1.4.0.20-00-20171027-CS
+eth0 04:65:65:FF:FF:FF QCA7005 MAC-QCA7005-1.1.0.730-04-20140815-CS
+```
+
+Step 2: Read the software version of the remote device
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -r
+eth0 04:65:65:FF:FF:FF Request Version Information
+eth0 04:65:65:FF:FF:FF QCA7005 MAC-QCA7005-1.1.0.730-04-20140815-CS
+```
+
+Step 3: read the device attributes
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -a
+eth0 04:65:65:FF:FF:FF Fetch Device Attributes
+eth0 04:65:65:FF:FF:FF QCA7005-MAC-QCA7005-1.1.0.730-04-20140815-CS (1mb)
+```
+
+Step 4: read the flash memory parameters (of the SPI flash chip)
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -f
+eth0 04:65:65:FF:FF:FF Fetch NVRAM Configuration
+eth0 04:65:65:FF:FF:FF TYPE=0x14 (M25P16_ES) PAGE=0x0100 (256) BLOCK=0x10000 (65536) SIZE=0x200000 (2097152)
+```
+
+Step 5: read the PIB header
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -I
+	PIB 0-0 8080 bytes
+	MAC 04:65:65:FF:FF:FF
+	DAK 00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00 (none/secret)
+	NMK 77:77:AB:22:77:77:77:77:77:77:77:77:77:77:77:77
+	NID 01:02:03:04:05:06:07
+	Security level 0
+	NET Qualcomm Atheros Enabled Network
+	MFG Qualcomm Atheros HomePlug AV Device
+	USR YURA CCM SOP DEFAULT
+	CCo Never
+	MDU N/A
+```
+
+Step 6: read the powerline link status (?)
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -L
+eth0 04:65:65:FF:FF:FF Request Version Information
+eth0 04:65:65:FF:FF:FF 1
+```
+
+Step 7: read the network membership information
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -m
+eth0 04:65:65:FF:FF:FF Fetch Network Information
+eth0 04:65:65:FF:FF:FF Found 1 Network(s)
+
+source address = 04:65:65:FF:FF:FF
+
+	network->NID = 01:02:03:04:05:06:07
+	network->SNID = 9
+	network->TEI = 2
+	network->ROLE = 0x00 (STA)
+	network->CCO_DA = 98:48:27:5A:3C:E4
+	network->CCO_TEI = 1
+	network->STATIONS = 1
+
+		station->MAC = 98:48:27:5A:3C:E4
+		station->TEI = 1
+		station->BDA = B8:27:EB:E6:39:89
+		station->AvgPHYDR_TX = 009 mbps Primary
+		station->AvgPHYDR_RX = 009 mbps Primary
+```
+
+Step 8: read the firmware. This is denied.
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -n firmwaredump.nvm
+eth0 04:65:65:FF:FF:FF Read Module from Memory
+eth0 04:65:65:FF:FF:FF Module not available in NVM or Memory (0x32): Device refused request
+```
+
+Step 9: read the parameters (PIB). This works.
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -p parameterdump.pib
+eth0 04:65:65:FF:FF:FF Read Module from Memory
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -p parameterdump2.pib
+eth0 04:65:65:FF:FF:FF Read Module from Memory
+pi@RPi2023:~/myprogs/open-plc-utils $ ls -al parameterdump.pib 
+-rw-r--r-- 1 pi pi 9040 17. Sep 15:34 parameterdump.pib
+```
+
+Step 10: write the PIB. This works.
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -P parameterdump2.pib
+eth0 04:65:65:FF:FF:FF Start Module Write Session
+eth0 04:65:65:FF:FF:FF Flash parameterdump2.pib
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x11
+MOD_OP_DATA_LEN 1423
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x00000000
+MSTATUS 0x0000
+ERROR_REC_CODE 0
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x00
+MOD_OP_DATA_LEN 23
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x05780000
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x11
+MOD_OP_DATA_LEN 1423
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x00000578
+MSTATUS 0x0000
+ERROR_REC_CODE 0
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x00
+MOD_OP_DATA_LEN 23
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x05780000
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x11
+MOD_OP_DATA_LEN 1423
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x00000AF0
+MSTATUS 0x0000
+ERROR_REC_CODE 0
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x00
+MOD_OP_DATA_LEN 23
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x05780000
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x11
+MOD_OP_DATA_LEN 1423
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x00001068
+MSTATUS 0x0000
+ERROR_REC_CODE 0
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x00
+MOD_OP_DATA_LEN 23
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x05780000
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x11
+MOD_OP_DATA_LEN 1423
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x000015E0
+MSTATUS 0x0000
+ERROR_REC_CODE 0
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x00
+MOD_OP_DATA_LEN 23
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x05780000
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x11
+MOD_OP_DATA_LEN 1423
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x00001B58
+MSTATUS 0x0000
+ERROR_REC_CODE 0
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x00
+MOD_OP_DATA_LEN 23
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 1400
+MODULE_OFFSET 0x05780000
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x11
+MOD_OP_DATA_LEN 1423
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 640
+MODULE_OFFSET 0x000020D0
+MSTATUS 0x0000
+ERROR_REC_CODE 0
+RESERVED 0x00000000
+NUM_OP_DATA 1
+MOD_OP 0x00
+MOD_OP_DATA_LEN 23
+RESERVED 0x00000000
+MODULE_ID 0x7002
+MODULE_SUB_ID 0x0000
+MODULE_LENGTH 640
+MODULE_OFFSET 0x02800000
+eth0 04:65:65:FF:FF:FF Close Session
+eth0 04:65:65:FF:FF:FF Reset Device
+eth0 04:65:65:FF:FF:FF Resetting ...
+```
+
+Step 11: Apply Factory Defaults. This works, but seems not to change something important. Charging still works, also after a power-on-reset.
+
+```
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -T
+eth0 04:65:65:FF:FF:FF Restore Factory Defaults
+eth0 04:65:65:FF:FF:FF Restoring ...
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -p parameterdump_afterFactoryDefault.pib
+eth0 04:65:65:FF:FF:FF Read Module from Memory
+pi@RPi2023:~/myprogs/open-plc-utils $ plctool -ieth0 04:65:65:FF:FF:FF -I
+	PIB 0-0 8080 bytes
+	MAC 04:65:65:FF:FF:FF
+	DAK 00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00 (none/secret)
+	NMK 77:77:AB:22:77:77:77:77:77:77:77:77:77:77:77:77
+	NID 01:02:03:04:05:06:07
+	Security level 0
+	NET Qualcomm Atheros Enabled Network
+	MFG Qualcomm Atheros HomePlug AV Device
+	USR YURA CCM SOP DEFAULT
+	CCo Never
+	MDU N/A
+pi@RPi2023:~/myprogs/open-plc-utils $ 
+```
