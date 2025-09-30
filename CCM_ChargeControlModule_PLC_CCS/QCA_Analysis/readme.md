@@ -868,6 +868,35 @@ Conclusions:
 * The pins have two control bits, which select between H, L and tristate.
 * The read-back state (H or L) is at the higher bit position.
 
+## Further JTAG investigations
+
+with TRST=L
+ we see heavy activity on RTCK, slower than the 1kHz clock, if we try auto-probing with 1kHz clock.
+
+This works in both cases of TDO pulling: pull-up and pull-down.
+
+Next step: How to use slower clock or adaptive clocking with openOCD?
+
+- step 1: in the interface config of openOCD, set the clock speed to zero, to enable adaptive clocking: "adapter speed 0".
+- step 2: https://ftdichip.com/wp-content/uploads/2024/09/DS_FT232H.pdf says: "The FT232H will assert the TCK line and wait for the RTCK to be returned from the target device to GPIOL3 line before changing the TDO (data out line)." We connect the RTCK to the AD7, because the cfg files says "ftdi layout_signal GPIOL3 -data 0x0080 -oe 0x0080"
+
+Result: The FT232HQ adapts the TCK according to the feedback on RTCK.
+
+The slow RCLK disappears (sometimes) after power-on-reset.
+
+It re-appears after the following sequence:
+- precondition: TDO pulled high.
+- pull TRST to high
+- configure openODC to use 1kHz clock (without adaptive clocking): "adapter speed 1"
+- run openOCD without configured taps. Just auto-probing. This finds the 5-bit-TAP.
+- pull TRST to low
+- configure openOCD to use adaptive clocking: "adapter speed 0"
+- run openOCD. Now we see clocks on TCK and RTCK with 1 to 3ms on- and off-time.
+- it does not find TAPs: Error: JTAG scan chain interrogation failed: all ones
+
+Conclusion: This is a state where slow module is between the TCK and the RTCK, but it does not show anything on TDO.
+
+
 ## Controlling openOCD from python
 
 docu: https://gitlab.zapb.de/openocd/python-openocd
