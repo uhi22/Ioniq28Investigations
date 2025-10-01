@@ -896,6 +896,24 @@ It re-appears after the following sequence:
 
 Conclusion: This is a state where slow module is between the TCK and the RTCK, but it does not show anything on TDO.
 
+### Variation points
+
+1. TRST pulled low or high
+2. TDO pulled low or high during power-on
+3. System-Reset: (a) not used, (b) released before TRST, (c) released after TRST
+4. Timing of power-on, system-reset, TRST, first TCK
+5. Line-swaps between data sheet and real world
+
+### Observed TAPs
+
+- TAP5bit:
+    - precondition: TRST=H, TDO=pullup
+    - observation: 5-bit-TAP. Works for boundary scan, aka control and read pin states.
+- TAPslow:
+    - precondition: some actions on TAP5bit (maybe just reading twice). Then pull TRST low. Enable adaptive clocking.
+    - observation: adaptive clocking forces very slow clock (~2 to ~6ms cycle time). No activity on TDO.
+    - todo: does the slow timing relate to SPI transfers to flash or host?
+- TAParm: not found yet. Should be a 4-bit-TAP.
 
 ## Controlling openOCD from python
 
