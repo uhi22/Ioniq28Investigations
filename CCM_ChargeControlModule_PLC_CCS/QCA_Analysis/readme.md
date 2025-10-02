@@ -931,6 +931,7 @@ Warn : Haven't made progress in mpsse_flush() for 2026ms.
 Info : JTAG tap: auto0.tap tap/device found: 0x07926477 (mfg: 0x23b (ARM Ltd), part: 0x7926, ver: 0x0)
 Warn : AUTO auto0.tap - use "jtag newtap auto0 tap -irlen 4 -expected-id 0x07926477"
 ```
+
     - limitations:
         - The TAParm is not visible while SRES is hold low. In this state, the debug adapter waits for the RTCK, and this works as soon as SRES is released.
         - The TAParm disappears when TRST is pulled low, and even stays away if the TRST is high again. This does not "heal" by applying SRST. It "heals" by a power-on-reset of the QCA.
