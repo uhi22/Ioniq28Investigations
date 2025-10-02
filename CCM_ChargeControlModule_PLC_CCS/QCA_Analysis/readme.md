@@ -913,7 +913,28 @@ Conclusion: This is a state where slow module is between the TCK and the RTCK, b
     - precondition: some actions on TAP5bit (maybe just reading twice). Then pull TRST low. Enable adaptive clocking.
     - observation: adaptive clocking forces very slow clock (~2 to ~6ms cycle time). No activity on TDO.
     - todo: does the slow timing relate to SPI transfers to flash or host?
-- TAParm: not found yet. Should be a 4-bit-TAP.
+- TAParm: Should be a 4-bit-TAP.
+    - preconditions
+        - TDO=270k pulldown
+        - TRST=2k pullup
+        - TRST not connected to jtag adapter
+        - SRST not connected to jtag adapter
+        - openOCD configured to use adaptive clocking: "adapter speed 0"
+        - RTLK connected to AD7 of the FT232H, which is the return clock input of the adapter.
+        - power-on the QCA
+        - connect the FT232H to the PC
+    - observation: clock cycle time is between multiple milliseconds and 170ns (~6MHz), and shows the expected 4-bit instruction register and ID code:
+```
+Info : RCLK (adaptive clock speed)
+Warn : There are no enabled taps.  AUTO PROBING MIGHT NOT WORK!!
+Warn : Haven't made progress in mpsse_flush() for 2026ms.
+Info : JTAG tap: auto0.tap tap/device found: 0x07926477 (mfg: 0x23b (ARM Ltd), part: 0x7926, ver: 0x0)
+Warn : AUTO auto0.tap - use "jtag newtap auto0 tap -irlen 4 -expected-id 0x07926477"
+```
+    - limitations:
+        - The TAParm is not visible while SRES is hold low. In this state, the debug adapter waits for the RTCK, and this works as soon as SRES is released.
+        - The TAParm disappears when TRST is pulled low, and even stays away if the TRST is high again. This does not "heal" by applying SRST. It "heals" by a power-on-reset of the QCA.
+        
 
 ## Controlling openOCD from python
 
@@ -1409,3 +1430,9 @@ eth0 04:65:65:FF:FF:FF Read Module from Memory
 pi@RPi2023:~/myprogs/Ioniq28Investigations/CCM_ChargeControlModule_PLC_CCS/QCA_Analysis $ xxd readagain.pib | grep 00002340
 00002340: 0100 0000 0000 0000 0000 0000 0100 0000  ................
 ```
+
+
+# References
+
+- ref1: JTAG Router, JTAG Route Controller (JRC), enabling and disabling TAPS https://openocd.org/doc/html/TAP-Declaration.html chapter 10.6
+
