@@ -924,12 +924,13 @@ Conclusion: This is a state where slow module is between the TCK and the RTCK, b
         - power-on the QCA
         - connect the FT232H to the PC
     - observation: clock cycle time is between multiple milliseconds and 170ns (~6MHz), and shows the expected 4-bit instruction register and ID code:
+
 ```
-Info : RCLK (adaptive clock speed)
-Warn : There are no enabled taps.  AUTO PROBING MIGHT NOT WORK!!
-Warn : Haven't made progress in mpsse_flush() for 2026ms.
-Info : JTAG tap: auto0.tap tap/device found: 0x07926477 (mfg: 0x23b (ARM Ltd), part: 0x7926, ver: 0x0)
-Warn : AUTO auto0.tap - use "jtag newtap auto0 tap -irlen 4 -expected-id 0x07926477"
+    Info : RCLK (adaptive clock speed)
+    Warn : There are no enabled taps.  AUTO PROBING MIGHT NOT WORK!!
+    Warn : Haven't made progress in mpsse_flush() for 2026ms.
+    Info : JTAG tap: auto0.tap tap/device found: 0x07926477 (mfg: 0x23b (ARM Ltd), part: 0x7926, ver: 0x0)
+    Warn : AUTO auto0.tap - use "jtag newtap auto0 tap -irlen 4 -expected-id 0x07926477"
 ```
 
     - limitations:
