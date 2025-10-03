@@ -933,10 +933,46 @@ Conclusion: This is a state where slow module is between the TCK and the RTCK, b
     Warn : AUTO auto0.tap - use "jtag newtap auto0 tap -irlen 4 -expected-id 0x07926477"
 ```
 
-    - limitations:
+- limitations:
         - The TAParm is not visible while SRES is hold low. In this state, the debug adapter waits for the RTCK, and this works as soon as SRES is released.
         - The TAParm disappears when TRST is pulled low, and even stays away if the TRST is high again. This does not "heal" by applying SRST. It "heals" by a power-on-reset of the QCA.
         
+## Debugging with openOCD and GDB (Gnu Debugger)
+
+### Installation of GDB on Windows 10
+
+(Ref: https://stackoverflow.com/questions/67574925/update-gdb-version-on-windows-10)
+- Install MSYS2
+- in MSYS2, use pacman to install gdb: in msys2 terminal pacman -S --needed base-devel mingw-w64-x86_64-toolchain and you can then choose the packages you wish to install (including gdb and gdb-multiarch)
+- add the path to msys2 to the windows search path
+- open a new command window (git shell or CMD). gdb --version should work.
+
+### First steps with GDB
+
+- start openOCD. It should find the target.
+
+```
+C:\LegacyApp\openocd\OpenOCD-20250710-0.12.0\bin>openocd.exe
+Open On-Chip Debugger 0.12.0 (2025-07-10) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+        http://openocd.org/doc/doxygen/bugs.html
+Info : Listening on port 6666 for tcl connections
+Info : Listening on port 4444 for telnet connections
+Info : RCLK (adaptive clock speed)
+Info : JTAG tap: qca7000.cpu tap/device found: 0x07926477 (mfg: 0x23b (ARM Ltd), part: 0x7926, ver: 0x0)
+Info : Embedded ICE version 6
+Info : qca7000.cpu: hardware has 2 breakpoint/watchpoint units
+Info : [qca7000.cpu] Examination succeed
+Info : [qca7000.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+```
+
+- In a new shell: `gdb-multiarch.exe` (Do not run gdb.exe, it does not have the support for ARM.)
+- `tar ext :3333`
+- `dump binary memory testdump0000_128k.bin 0x0 0x20000` dumps 128k from address 0x0 into the specified file.
+
 
 ## Controlling openOCD from python
 
