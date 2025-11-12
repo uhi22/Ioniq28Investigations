@@ -947,6 +947,7 @@ Conclusion: This is a state where slow module is between the TCK and the RTCK, b
 - add the path to msys2 to the windows search path
 - open a new command window (git shell or CMD). gdb --version should work.
 
+
 ### First steps with GDB
 
 - start openOCD. It should find the target.
@@ -970,9 +971,15 @@ Info : Listening on port 3333 for gdb connections
 ```
 
 - In a new shell: `gdb-multiarch.exe` (Do not run gdb.exe, it does not have the support for ARM.)
+- or better `winpty gdb-multiarch.exe` which allows layouts (TUI) in the git bash.
 - `tar ext :3333`
 - `dump binary memory testdump0000_128k.bin 0x0 0x20000` dumps 128k from address 0x0 into the specified file.
-
+- `layout asm` to show the disassembly window
+- `c` to continue
+- `ctrl-c` to halt
+- `break *0x12a76` to set a breakpoint at a certain address
+- `hbreak *0x255e4c` to set hardware breakpoint
+- `hbreak *0x258706` to set hardware breakpoint in sendResponseForA088_VS_CLASSIFICATION()
 
 ## Controlling openOCD from python
 
