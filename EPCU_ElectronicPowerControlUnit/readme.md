@@ -223,6 +223,17 @@ Conclusions for Diagnostic Communication:
 - The two controllers of the EPCU have separate ID pairs.
     - Vehicle controller (VCU) 7E2 -> 7EA
     - Motor controller (MCU) 7E3 -> 7EB.
+    
+## Immobilizer / VIN locking
+
+When swapping an EPCU from one vehicle to an other, this leads to immo error. Root cause is, that the VIN
+is stored in the EPCU and compared with the VIN stored somewhere else.
+The good news is: The VIN is stored in U2001, this is an 8-pin EEPROM 95640, which can be easily swapped.
+
+https://openinverter.org/forum/viewtopic.php?p=87487#p87487
+
+Alternatively, the whole controller board can be taken from the matching car.
+https://www.goingelectric.de/forum/viewtopic.php?p=2237618#p2237618
 
 ## Gate driver board
 
