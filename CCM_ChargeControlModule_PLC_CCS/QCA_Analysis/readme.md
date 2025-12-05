@@ -1476,6 +1476,84 @@ pi@RPi2023:~/myprogs/Ioniq28Investigations/CCM_ChargeControlModule_PLC_CCS/QCA_A
 00002340: 0100 0000 0000 0000 0000 0000 0100 0000  ................
 ```
 
+# Python 3 Scripting in Ghidra
+
+https://www.youtube.com/watch?v=T5n9zcIV8t4
+https://www.youtube.com/watch?v=debaKMGM78E
+
+The original ghidra does only support python 2, not python 3. To use python 3 in ghidra,
+we need to install ghidrathon https://github.com/mandiant/Ghidrathon
+
+- Download the ghidrathon zip and unzip it to in C:\tools\ghidrathon
+- open a command line in C:\tools\ghidrathon
+- python -m pip install -r requirements.txt
+    - if this compains about missing microsoft build tools, install them.
+- python ghidrathon_configure.py C:\ghidra_11.4.2_PUBLIC
+
+## Excurse: python issues
+
+The ghidrathon complains, that `C:\Users\uwemi\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\python.exe is not valid.`
+
+`where python` shows C:\Users\uwemi\AppData\Local\Microsoft\WindowsApps\python.exe and this is a link `lrwxrwxrwx 1 uwemi 197611 111 Apr 11  2023 python.exe -> '/c/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0/python3.10.exe'`
+
+`python --version` shows Python 3.10.11
+
+/c/Program Files/WindowsApps/ cannot be viewed (permission denied)
+
+Try: fresh install a python 3.11 with the windows installer. This adds to the path variable:
+- C:\Users\uwemi\AppData\Local\Programs\Python\Python311\
+- C:\Users\uwemi\AppData\Local\Programs\Python\Python311\Scripts\
+
+Result: Looks good. There is a real python.exe in this path, not a link. And it is on the top of the path, when using cmd:
+```
+C:\Users\uwemi>where python
+C:\Users\uwemi\AppData\Local\Programs\Python\Python311\python.exe
+C:\Users\uwemi\AppData\Local\Microsoft\WindowsApps\python.exe
+C:\Users\uwemi>python --version
+Python 3.11.7
+```
+And also looks good when using the git bash:
+```
+$ which python
+/c/Users/uwemi/AppData/Local/Programs/Python/Python311/python
+$ python --version
+Python 3.11.7
+```
+
+Configure ghidrathon with this new python installation:
+
+```
+C:\tools\ghidrathon>python -m pip install -r requirements.txt
+Collecting jep==4.2.0 (from -r requirements.txt (line 1))
+  Using cached jep-4.2.0.tar.gz (3.0 MB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Building wheels for collected packages: jep
+  Building wheel for jep (pyproject.toml) ... done
+  Created wheel for jep: filename=jep-4.2.0-cp311-cp311-win_amd64.whl size=352757 sha256=9d1d8523fd52761321849708380d5ae108e47da41ba0137ce0fb197dfdc2c8db
+  Stored in directory: c:\users\uwemi\appdata\local\pip\cache\wheels\b0\d9\10\2e0de80a74a23c02dc49b317d0a598029239c88166286831de
+Successfully built jep
+Installing collected packages: jep
+Successfully installed jep-4.2.0
+
+[notice] A new release of pip is available: 23.2.1 -> 25.3
+[notice] To update, run: python.exe -m pip install --upgrade pip
+
+C:\tools\ghidrathon>python --version
+Python 3.11.7
+
+C:\tools\ghidrathon>python ghidrathon_configure.py C:\ghidra_11.4.2_PUBLIC
+2025-12-05 11:54:57,478 INFO     Ghidrathon has been configured to use this Python interpreter. Please restart Ghidra for these changes to take effect.
+```
+
+Result: ghidrathon works inside of Ghidra.
+
+# Unicorn - emulate ARM code inside ghidra
+
+https://cloud.google.com/blog/topics/threat-intelligence/ghidrathon-snaking-ghidra-python-3-scripting/?hl=en
+
+
 
 # References
 
