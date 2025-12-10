@@ -279,6 +279,18 @@ Secondary side:
 The ports for the input, LVDC, IGBT module and discharge resistor are just connected in parallel.
 The discharge resistor has 70kohm / 10W. It causes 5mA or 1.75W at 350V.
 
+## Breather
+
+The size of the breather is the same as the one used in the Ioniq5 ICCU, discussed here: https://www.goingelectric.de/forum/viewtopic.php?p=2383705#p2383705 where the data sheet is
+mentioned https://2105741.s21i.faimallusr.com/61/ABUIABA9GAAg_6jFsAYowPqOmAY.pdf
+Inside the breather, there is a QR code. According to https://qrscanner.net/de this shows S12570120170125PM, which looks like a serial number including the production day (2017-01-25).
+
+![image](2025-12-10_breather_1.jpg)
+![image](2025-12-10_breather_2.jpg)
+![image](2025-12-10_breather_3.jpg)
+![image](2025-12-10_breather_QRcode.jpg)
+
+
 
 ## References
 
