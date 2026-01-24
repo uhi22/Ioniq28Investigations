@@ -67,9 +67,10 @@ Battery relay status, mode, and all individual cellvoltages can be read via this
 
 ## Parts of the Battery
 
-Dismantling of Ioniq 28kWh battery is shown here:
-* https://youtu.be/OYiFxLM5M6Y
+Dismantling of Ioniq 28kWh battery is shown here: https://youtu.be/OYiFxLM5M6Y
 
-It contains 12 modules:
+Potential inner view of a 10s module: https://www.speakev.com/threads/hv-battery-ioniq-electric-28kwh-repair-replacement.193416/#post-3829113
+
+The pack contains 12 modules:
 * 6 modules in 6S configuration
 * 6 modules in 10S configuration
