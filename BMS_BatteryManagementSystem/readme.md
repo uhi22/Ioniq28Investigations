@@ -1,4 +1,4 @@
-
+# Battery and BMS
 
 ## Part numbers
 
@@ -64,3 +64,12 @@ The battery can be queried for 5 different multiframe groups. The polling messag
 The 2nd byte (0x01) determines which group gets polled. The BMS replies to 0x01-0x05. It is OK to ask for a new group every 250ms.
 
 Battery relay status, mode, and all individual cellvoltages can be read via this active polling. An example on how to do this can be found on the [Battery-Emulator repository](https://github.com/dalathegreat/Battery-Emulator)
+
+## Parts of the Battery
+
+Dismantling of Ioniq 28kWh battery is shown here:
+* https://youtu.be/OYiFxLM5M6Y
+
+It contains 12 modules:
+* 6 modules in 6S configuration
+* 6 modules in 10S configuration
