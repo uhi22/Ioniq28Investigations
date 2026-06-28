@@ -2,6 +2,10 @@
 
 Diese Seite sammelt Tips und Tricks, um selber am Ioniq zu werkeln. Empfohlende Sortierung: Alphabetisch
 
+Diese Seite lebt (mehr oder weniger sychronisiert) an zwei Plätzen:
+- im goingelectric Wiki https://www.goingelectric.de/wiki/Hyundai-Ioniq-Do-It-Yourself
+- auf github https://github.com/uhi22/Ioniq28Investigations/tree/main/do-it-yourself
+
 ## Armaturenbrettabdeckung entfernen
 
 Die mittlere Armaturenbrettabdeckung, unter der der Center-Speaker sitzt und die auch die blaue Dreifachladeanzeige enthält, lässt sich ohne Werkzeug entfernen. Am ungefährlichsten ist es, dazu die Headunit auszubauen (siehe unten), und dann die weißen Einrastelemente von unten nach oben zu drücken. Ist das erste locker, kann man mit den Fingern oben zwischen Abdeckung und Armaturenbrett reinzwängen und die restlichen Klipse lösen.
