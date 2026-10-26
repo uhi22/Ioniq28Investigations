@@ -322,7 +322,7 @@ By replaying an trace from vehicle, and filtering-out most of the messages, foun
 initiate a PLC communication:
 - 0x57F unclear what this contains
 - 0x597 contains a toggle bit and some other information
-- 0x599 contains the "CCS trigger bit" (byte7, bit 0), which initiates the SLAC. Also the SOC in byte 2.
+- 0x599 contains the "CCS trigger bit" (byte7, bit 0), which initiates the SLAC. Also the SOC in byte 2 (0.5%/LSB), which the CCM sends to the charger as EVRESSSOC (integer %).
 
 Using these three messages from the trace ioniq2018_motorCAN_500k_HPC.asc (from github.com/uhi22/IoniqMotorCAN/Traces), and replaying them against
 a physical CCM unit, the CCM makes the SLAC, SDP and comes until PowerDeliveryReq, with 34% SOC. Afterwards it sends a SessionStopRequest,
@@ -375,7 +375,7 @@ The minimal set (0x57F, 0x597, 0x599, see above) brings the CCM only until Contr
 |---|---|---|
 | 0x57F | SLAC | `94 76 92 00 07 20 00 05` (static) |
 | 0x597 | SLAC | B0 bit 7 toggle bit, B1 `C3`, B7 `00` → `02` at PowerDelivery |
-| 0x599 | SLAC | B0 `08` → `09`, B1 `00` → `10`, B2 SOC (0.5%), B7 bit 0 CCS trigger (`01` → `03`) |
+| 0x599 | SLAC | B0 `08` → `09`, B1 `00` → `10`, B2 SOC (0.5%; the CCM sends it as EVRESSSOC to the charger, integer %), B7 bit 0 CCS trigger (`01` → `03`) |
 | 0x5A3 | ChargeParameterDiscovery | `63 30 48 00 00 00 00 00` (static; B1..B2 = 18480, maybe the EVEnergyRequest in Wh) |
 | 0x59C | PreCharge and CurrentDemand | B2..B3 (LE16, 0.1V) target voltage, B4..B5 (LE16, 0.1A) target current |
 
