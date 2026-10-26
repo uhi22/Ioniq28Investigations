@@ -325,32 +325,129 @@ initiate a PLC communication:
 - 0x599 contains the "CCS trigger bit" (byte7, bit 0), which initiates the SLAC. Also the SOC in byte 2.
 
 Using these three messages from the trace ioniq2018_motorCAN_500k_HPC.asc (from github.com/uhi22/IoniqMotorCAN/Traces), and replaying them against
-a physical CCM unit, the CCM makes the SLAC, SDP and comes until PowerDeliveryReq, with 34% SOC. Afterwards it sends a SessionStopRequest.
+a physical CCM unit, the CCM makes the SLAC, SDP and comes until PowerDeliveryReq, with 34% SOC. Afterwards it sends a SessionStopRequest,
+because 0x5A3 is missing. With 0x5A3 and 0x59C additionally, the complete session runs, see below.
 
 ### Reconstruction of the start of a CCS charging session
 
-(Timing from the CAN trace with alpitronics charger)
+(Timing from the CAN trace with alpitronics charger. The 0x5D7 flags and the inlet voltage 0x542 are sent by the car, but the CCM does not need them, see below.)
 1. t=0: After plugging in and applying the 5% PWM, this first activity on CAN is 5D7_1_CCS_firstTrigger=1
-2. t=596ms: CCS_COMMS_TRIGGER = 1
+2. t=596ms: CCS_COMMS_TRIGGER = 1 (0x599 B7 bit 0)
 3. t=600ms: 5D7_1_CcsStart = 1.
 4. t=6.9s: CCM_CCS_TCP_connected = 1
-5. t=8.5s: CCM_ChargeProgress=1 (ConnectorLocking request?)
-6. 5D7_4_remainingTimeBulk indicates the time until bulk charge complete
+5. t=8.5s: CCM_ChargeProgress=1: ChargeParameterDiscovery done (the charger parameters appear in 0x5E5/0x5E6/0x5E8 at the same time)
+6. 5D7_4_remainingTimeBulk (0x5D7 B4..B5, in s) indicates the time until bulk charge complete. It is a mirror of 0x59E B2..B3, from which the CCM takes the remaining times.
 7. 5D7_0_ConnectorLockConfirm=1 Confirms the connector lock (?)
 8. CCM_ChargeProgress changes to CableCheck (3)
-9. 542_78_UCCS ramps up to 500V.
+9. 542_78_UCCS (inlet voltage, measured by the vehicle) ramps up to 500V.
 10. After 9.5s cable check, the voltage ramps down.
-11. When the voltage is below 6V, the CCM_ChargeProgress changes to PreCharge.
+11. The CCM reports the cable check done (0x5E6 B1 bit 2), the vehicle requests 1A at battery voltage in 0x59C, and the CCM_ChargeProgress changes to PreCharge. (In the car this happens when the inlet voltage is below 6V; the CCM itself does not evaluate the inlet voltage.)
 12. After 0.9s, this is confirmed by the 5D7_1.1 PreChCnf
 13. CCM_ChargeProgress changes to PowerDeliveryStart
 14. 5D7_1.4_ContactorsClosed confirmes the closed contactors
 15. CCM_ChargeProgress changes to CurrentDemand
-16. Current is ramping up. Charging.
+16. Current is ramping up (target current in 0x59C, ramped by the vehicle). Charging.
 17. 5D7_4_remainingTimeBulk is decreasing each minute by 60s.
 18. When charging ends, the CCM_ChargeProgress changes to 63 (PowerDeliveryStop).
 19. 5D7_0_ConnectorLockConfirm changes to 0. (This is too early for a connector unlocking. Maybe its an other signal.)
 20. The inlet voltage (542_78_UCCS) is ramping down.
 21. CCM_ChargeProgress 127 (WeldingDetection).
+
+## Running a complete charging session on the bench
+
+(Details of the investigation: https://github.com/uhi22/ioniq-chargepower-reducer, doc/bench-testing.md.)
+
+With a CAN simulation of the vehicle, a CCM on the bench runs a complete CCS session, including the CurrentDemand loop:
+SLAC, SDP, ..., ChargeParameterDiscovery, CableCheck, PreCharge, PowerDelivery, CurrentDemand.
+
+### Setup
+
+- CCM CAN connected to a PEAK PCAN-USB adapter (500 kBaud), which runs the vehicle simulation [vehiclesim.py](vehiclesim.py).
+- CCM CP and PE connected to a charger simulation (pyPLC in EVSE mode). The CCM does only the high level communication, it does not care about the 5% PWM and the CP states B/C.
+- Start order for a fresh SLAC: CCM off (both 12V pins unpowered), start (or restart) the charger simulation and wait until its modem is ready, then switch on the CCM (both 12V pins powered) and start the CAN simulation.
+- After a session (SessionStop), the CCM did not start a new session, also not when the CCS trigger bit was switched off for 3s and on again. (Other CAN ways were not tried.) A power cycle of the CCM works.
+
+### What the vehicle has to send
+
+The minimal set (0x57F, 0x597, 0x599, see above) brings the CCM only until ContractAuthentication. For the complete session, the CCM needs only two more messages, so **5 vehicle messages in total**:
+
+| ID | Needed for | Content in the simulation |
+|---|---|---|
+| 0x57F | SLAC | `94 76 92 00 07 20 00 05` (static) |
+| 0x597 | SLAC | B0 bit 7 toggle bit, B1 `C3`, B7 `00` → `02` at PowerDelivery |
+| 0x599 | SLAC | B0 `08` → `09`, B1 `00` → `10`, B2 SOC (0.5%), B7 bit 0 CCS trigger (`01` → `03`) |
+| 0x5A3 | ChargeParameterDiscovery | `63 30 48 00 00 00 00 00` (static; B1..B2 = 18480, maybe the EVEnergyRequest in Wh) |
+| 0x59C | PreCharge and CurrentDemand | B2..B3 (LE16, 0.1V) target voltage, B4..B5 (LE16, 0.1A) target current |
+
+- Without 0x5A3, the CCM stops after ContractAuthenticationReq.
+- Without 0x59C, the CCM aborts ~2.5s after the CableCheck. After the CableCheck, the CCM waits for target current 1A and target voltage = battery voltage, before it sends the PreChargeReq.
+
+This was found by removing messages one by one: each of 0x594, 0x595, 0x59E, 0x5D8, 0x5D7, 0x542 can be omitted, and a session with only the 5 messages above runs completely (75s test, 426x CurrentDemandReq, EVTargetCurrent follows 0x59C).
+So also 0x5D7 with its handshake flags (ConnectorLockConfirm, PreChCnf, ContactorsClosed) is **not needed** by the CCM.
+Not yet minimized: which bytes inside the 5 messages are needed, e.g. whether the changes of 0x597 / 0x599 during the session are required.
+
+Not needed for the session, but needed for a real charger: **0x59E**
+- B0..B1 (LE16, s) = RemainingTimeToFullSoC, B2..B3 (LE16, s) = RemainingTimeToBulkSoC
+- B6..B7 (LE16) = EVMaximumPowerLimit (car: 9800 = 98kW)
+
+The CCM forwards them 1:1 into ChargeParameterDiscoveryReq / CurrentDemandReq (verified with distinctive values 1111s / 777s / 4660). Without 0x59E, the remaining times are 0, and the **EVMaximumPowerLimit is 0**. pyPLC ignores this, but a real charger may refuse or limit the session. The "remainingTimeBulk" in 0x5D7 B4..B5 (see the reconstruction above) and `remainingChTDC` in 0x596 have no influence; 0x5D7 B4..B5 is only a mirror of 0x59E B2..B3.
+
+Not needed: 0x542 B6..B7 (LE16, 0.1V), the inlet voltage UCCS measured by the vehicle. In the car, it rises to ~500V during the CableCheck, comes down below 6V before the PreCharge, and follows the EVSE voltage afterwards. The CCM does not evaluate it: with the inlet voltage constant at 4.9V for the whole session, and also with 500V remaining after the CableCheck, the session runs exactly the same way until CurrentDemand.
+
+The simulation [vehiclesim.py](vehiclesim.py) sends the 5 needed messages plus 0x59E, and reacts on the CCM progress like the car does:
+
+| CCM reports | Vehicle answers |
+|---|---|
+| start | 0x599 B7 bit 0 (CCS trigger) |
+| CCM_ChargeProgress 1 (charge parameters known) | 0x599 B0 = 09 |
+| 0x5E6 B1 bit 2 (cable check done) | 0x59C target current 1A, target voltage 346.5V (battery voltage) |
+| CCM_ChargeProgress 7 (PreCharge) | When the EVSE present voltage (0x5E5 B4..B5) reaches the battery voltage: 0x599 B1 = 10 |
+| CCM_ChargeProgress 15 (PowerDelivery) | 0x597 B7 = 02, 0x599 B7 = 03 |
+| CCM_ChargeProgress 31 (CurrentDemand) | 0x59C target current ramps (10A/s) to the wanted current, target voltage 412.8V |
+
+(In the car, 0x5D7 carries additional flags at these points: CCS_firstTrigger, CcsStart, ConnectorLockConfirm, PreChCnf, ContactorsClosed, see the reconstruction above. The CCM does not need them, so the simulation does not send 0x5D7.)
+
+### What the CCM sends
+
+| Signal | Meaning |
+|---|---|
+| 0x5E9 B0 | bit 0: alive toggle. Bits 1..7: CCM_ChargeProgress, 1 charge parameters known, 3 CableCheck, 7 PreCharge, 15 PowerDelivery, 31 CurrentDemand, 63 PowerDeliveryStop, 127 WeldingDetection. After an abort, bit 6 is set on top of the last progress (e.g. 0x46/0x47 after an abort in the CableCheck). |
+| 0x5E6 B0 bit 3 | cable check running |
+| 0x5E6 B1 bit 2 | cable check done |
+| 0x5E6 B0 bit 7 | CurrentDemand running |
+| 0x5E8 B6 | EVSEStatusCode received from the charger (01 EVSE_Ready, 04 EVSE_IsolationMonitoringActive, 00 EVSE_NotReady). D0 / D1 shortly before an abort. |
+| 0x5E5 | B0..B1 EVSE maximum voltage, B2..B3 EVSE maximum current, B4..B5 EVSE present voltage, B6..B7 EVSE present current (all LE16, 0.1V / 0.1A) |
+| 0x5E6 B6..B7 | EVSE maximum power (LE16, 10W). Likely: pyPLC 10kW → 1000; car trace 8256 = 82.6kW |
+| 0x5E8 B2..B3 | EVSE minimum current (LE16, 0.1A). Likely: pyPLC 1A → 10; car trace 0 |
+| 0x5E8 B4..B5 | EVSE minimum voltage (LE16, 0.1V). Likely: pyPLC 200V → 2000; car trace 1500 = 150V |
+
+The "likely" lines are derived from two data points each (pyPLC ChargeParameterDiscoveryRes and the car trace), not yet tested with changed charger values.
+
+### Which signal controls the charging current?
+
+The car sends the same current in two messages: 0x5D7 (B2..B3 in 0.1A, B7 in 1A) and 0x59C B4..B5 (0.1A).
+Varying them independently on the bench shows:
+
+- **0x59C B4..B5 controls the EVTargetCurrent** of the CurrentDemandReq. The CCM forwards it 1:1, without own ramp or rate limit. Each step appears in the next CurrentDemandReq.
+- 0x5D7 has no influence, it is only a mirror.
+- 0x59C has no visible counter or checksum (B0..B1 BC A6 and B6..B7 60 6D static). Modified values are accepted.
+- The CurrentDemandReq also contains EVMaximumCurrentLimit 200.0A (also with only the 5 needed messages; source not identified, maybe 0x599 B3..B4 = 0x07D0 = 2000) and EVMaximumPowerLimit (from 0x59E B6..B7, see above). These were not modified in the tests.
+
+So the charging current can be limited by modifying 0x59C B4..B5 on the way from the vehicle to the CCM.
+
+### How to run the simulation
+
+Requires `pip install python-can` and the PEAK driver (PCANBasic.dll).
+
+Prepare the charger simulation, switch on the CCM (see Setup), then:
+
+```
+python vehiclesim.py                                  # 90s, 50A target current
+python vehiclesim.py -d 120 --current 0:60,20:30,40:80   # current profile, t (s after start of CurrentDemand) : current (A)
+```
+
+The script logs the CCM_ChargeProgress, and during the CurrentDemand once per second the target current and the EVSE present voltage and current.
+Tested on the bench: complete session, EVTargetCurrent follows the profile, RemainingTimeToFullSoC / ToBulkSoC = 1380s / 840s.
 
 
 ### Cross reference to the Kona (similar but not the same)
