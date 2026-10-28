@@ -1,5 +1,7 @@
 # Battery and BMS
 
+<img src="ioniq28_battery_opened.jpg" width="400" alt="Ioniq battery opened">
+
 ## Part numbers
 
 The Hyundai Ioniq 28kWh battery can have the following stickers on the case;
@@ -72,5 +74,9 @@ Dismantling of Ioniq 28kWh battery is shown here: https://youtu.be/OYiFxLM5M6Y
 Potential inner view of a 10s module: https://www.speakev.com/threads/hv-battery-ioniq-electric-28kwh-repair-replacement.193416/#post-3829113
 
 The pack contains 12 modules:
-* 6 modules in 6S configuration
-* 6 modules in 10S configuration
+* 6 modules in 6S configuration (modules 1, 2, 3 and 10, 11, 12) in the front
+* 6 modules in 10S configuration (modules 4, 5, 6, 7, 8, 9) in the rear. Nr 8 is the middle of the three right side modules, according to Ref2.
+
+- [Ref1] Short "open the case and walk around" video: https://www.youtube.com/watch?v=h0oTM-q7BCA
+- [Ref2] elbilmek Ioniq cell monitoring unit (CMU) exchange: https://www.youtube.com/watch?v=ovFhEDIoPQg
+- [Ref3] elbilmek near Oslo https://www.elbilmek.no/
