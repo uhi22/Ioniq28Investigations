@@ -6,6 +6,11 @@ Diese Seite lebt (mehr oder weniger sychronisiert) an zwei Plätzen:
 - im goingelectric Wiki https://www.goingelectric.de/wiki/Hyundai-Ioniq-Do-It-Yourself
 - auf github https://github.com/uhi22/Ioniq28Investigations/tree/main/do-it-yourself
 
+## Repair-Manuals
+
+https://www.hioniqae.com/hyundai_ioniq_ae_2017_2022_service_repair_manual-413.html
+(Die Anleitung nennt sich "AE", was eigentlich der voll-elektrische ist, aber es geht um den Hybrid.)
+
 ## Armaturenbrettabdeckung entfernen
 
 Die mittlere Armaturenbrettabdeckung, unter der der Center-Speaker sitzt und die auch die blaue Dreifachladeanzeige enthält, lässt sich ohne Werkzeug entfernen. Am ungefährlichsten ist es, dazu die Headunit auszubauen (siehe unten), und dann die weißen Einrastelemente von unten nach oben zu drücken. Ist das erste locker, kann man mit den Fingern oben zwischen Abdeckung und Armaturenbrett reinzwängen und die restlichen Klipse lösen.
